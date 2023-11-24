@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nick Chandler</title>
+    <link>https://nickchandler.dev/</link>
+    <description>Recent content on Nick Chandler</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <atom:link href="https://nickchandler.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About</title>
+      <link>https://nickchandler.dev/about/</link>
+      <pubDate>Wed, 22 Nov 2023 17:10:36 -0500</pubDate>
+      <guid>https://nickchandler.dev/about/</guid>
+      <description>Hello! &amp;#x1f44b;
+My name is Nick, and I&amp;rsquo;m a software engineer in Indiana (in the United States). I focus on backend, behind-the-scenes, software; if I am making a UI, it is probably a CLI. &amp;#x1f604;
+I enjoy learning about computer systems and software, and on this site, I hope to post occasionally about interesting things I learn as well as personal projects I work on.</description>
+    </item>
+  </channel>
+</rss>
