@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Nick Chandler</title>
-    <link>https://nickchandler.dev/</link>
-    <description>Recent content on Nick Chandler</description>
+    <title>wishr on Nick Chandler</title>
+    <link>https://nickchandler.dev/tags/wishr/</link>
+    <description>Recent content in wishr on Nick Chandler</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sat, 25 Nov 2023 22:01:00 -0500</lastBuildDate>
-    <atom:link href="https://nickchandler.dev/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://nickchandler.dev/tags/wishr/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>wishr - A Small Shell Written in Rust</title>
       <link>https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/</link>
@@ -15,15 +15,6 @@
       <guid>https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/</guid>
       <description>This is the first post in a series where I plan to document my experience writing a small Unix shell in Rust called wishr. In this post, I&amp;rsquo;ll describe why I&amp;rsquo;m starting this project and how I plan to proceed through it.
 Why write a shell? Link to heading First off, to be clear, I have no intention to make a production quality shell: Bash, Z Shell, fish, and the like, can all breathe a sigh of relief here!</description>
-    </item>
-    <item>
-      <title>About</title>
-      <link>https://nickchandler.dev/about/</link>
-      <pubDate>Wed, 22 Nov 2023 17:10:36 -0500</pubDate>
-      <guid>https://nickchandler.dev/about/</guid>
-      <description>Hello! &amp;#x1f44b;
-My name is Nick, and I&amp;rsquo;m a software engineer in Indiana (in the United States). I focus on backend, behind-the-scenes, software; if I am making a UI, it is probably a CLI. &amp;#x1f604;
-I enjoy learning about computer systems and software, and on this site, I hope to post occasionally about interesting things I learn as well as personal projects I work on.</description>
     </item>
   </channel>
 </rss>

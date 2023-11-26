@@ -2,15 +2,33 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://nickchandler.dev/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/posts/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/tags/rust/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/series/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/tags/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/tags/wishr/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/series/wishr/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/</loc>
+    <lastmod>2023-11-26T00:02:31-05:00</lastmod>
+  </url><url>
     <loc>https://nickchandler.dev/about/</loc>
     <lastmod>2023-11-22T17:09:47-05:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/categories/</loc>
-  </url><url>
-    <loc>https://nickchandler.dev/</loc>
-  </url><url>
-    <loc>https://nickchandler.dev/series/</loc>
-  </url><url>
-    <loc>https://nickchandler.dev/tags/</loc>
   </url>
 </urlset>
