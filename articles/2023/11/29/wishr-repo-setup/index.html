@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  wishr Repo Setup · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="An overview of the initial project setup">
+<meta name="keywords" content="blog,developer">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="wishr Repo Setup"/>
+<meta name="twitter:description" content="An overview of the initial project setup"/>
+
+<meta property="og:title" content="wishr Repo Setup" />
+<meta property="og:description" content="An overview of the initial project setup" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://nickchandler.dev/articles/2023/11/29/wishr-repo-setup/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-11-29T09:09:15-05:00" />
+<meta property="article:modified_time" content="2023-11-30T10:03:59-05:00" />
+<meta property="og:see_also" content="https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/" />
+
+
+
+
+
+
+<link rel="canonical" href="https://nickchandler.dev/articles/2023/11/29/wishr-repo-setup/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.135e22c97ff685fe983fc60048e309ced8f00d8d38f536aa67dba8a13a03dfa4.css" integrity="sha256-E14iyX/2hf6YP8YASOMJztjwDY049TaqZ9uooToD36Q=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Nick Chandler
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://nickchandler.dev/articles/2023/11/29/wishr-repo-setup/">
+              wishr Repo Setup
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-11-29T09:09:15-05:00">
+                November 29, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              4-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/wishr/">wishr</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>In the <a href="/articles/2023/11/25/wishr-a-small-shell-written-in-rust/" >previous post</a>, I described why I&rsquo;m writing a small Unix shell, which I&rsquo;m calling <a href="https://github.com/nwchandler/wishr"  class="external-link" target="_blank" rel="noopener">wishr</a>, along with a bit of an overview of how I plan to approach the project. I&rsquo;m excited to get started on the shell, itself, but it&rsquo;s important to get a new repo set up for success. So, in this post, I&rsquo;ll go through the initial repository setup I&rsquo;ve gone with.</p>
+<p>If you&rsquo;d like to look at the specific git commit, <a href="https://github.com/nwchandler/wishr/commit/2a01c0b8a35c5281f8f9d8e9eb8d6b4051b24cc9"  class="external-link" target="_blank" rel="noopener">here it is!</a> In future changes, I plan to open up PRs and then share links to them instead of pushing changes directly to the <code>main</code> branch, but as the first substantive commit, I decided to be a little more cavalier on this one.</p>
+<h2 id="application-setup">
+  Application Setup
+  <a class="heading-link" href="#application-setup">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Because this is a Rust project, I started out with <code>cargo new wishr</code> to create the repo. From this, we have a basic <code>Cargo.toml</code>, <code>Cargo.lock</code>, and <code>src/main.rs</code>. Aside from changing <code>&quot;Hello, world&quot;</code> to <code>&quot;Hello, wishr&quot;</code>, I haven&rsquo;t made any code changes. There will be plenty of time to work on the application in the future! &#x1f604;</p>
+<h2 id="integration-test-setup">
+  Integration Test Setup
+  <a class="heading-link" href="#integration-test-setup">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Ultimately, I want <code>wishr</code> to be able to successfully pass all of the <a href="https://github.com/remzi-arpacidusseau/ostep-projects/tree/master/processes-shell"  class="external-link" target="_blank" rel="noopener">tests provided by the OSTEP authors.</a> We&rsquo;ll get to various implementation ideas throughout the project, but I&rsquo;m considering these tests to be acceptance criteria for the project. In this way, the tests will help me follow a form of <a href="https://en.wikipedia.org/wiki/Behavior-driven_development"  class="external-link" target="_blank" rel="noopener">Behavior-Driven Development</a> for the project. We will try and make each test pass, one at a time, until every requirement is met.</p>
+<p>With that said, I felt like it made sense to keep these tests in the same repository that the code will go into. I created a directory, <code>tester</code>, and then copied the testing code from OSTEP into the directory. I made some minor changes to <code>test-wish.sh</code> (naming it <code>test-wishr.sh</code> in the process), just to make the paths match up correctly. All of the test scenarios remain intact.</p>
+<p>Note that when the tests run, results are put into the <code>tester/tests-out</code> directory. I don&rsquo;t want this checked into source control, so I&rsquo;ve ignored that subdirectory in <code>tester/.gitignore</code>.</p>
+<h2 id="makefile--running-integration-tests">
+  Makefile &amp; Running Integration Tests
+  <a class="heading-link" href="#makefile--running-integration-tests">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>There are a few targets in <code>Makefile</code>: <code>build</code>, <code>clean</code>, and <code>test-integration</code>. I anticipate additional targets being added over time (unit tests, for example). Of the initial targets, <code>test-integration</code> is the primary one for now. It will clean up any previous build and test artifacts, build the application, and then run the integration tests described previously. I wanted to avoid changing all of the tests that were provided by the OSTEP project, and so the <code>test-integration</code> target copies the <code>wishr</code> binary to the <code>tester</code> directory and renames it to <code>wish</code>. I may end up deciding to change this in the future, but for now, it doesn&rsquo;t seem that important to me what the executable file is called.</p>
+<p>With all of the above in place, we can run our tests (at least until the first one fails!):</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt;  make test-integration
+</span></span><span style="display:flex;"><span>cargo clean
+</span></span><span style="display:flex;"><span>rm -rf ./tester/tests-out
+</span></span><span style="display:flex;"><span>rm -rf ./tester/wish
+</span></span><span style="display:flex;"><span>cargo build
+</span></span><span style="display:flex;"><span>   Compiling wishr v0.1.0
+</span></span><span style="display:flex;"><span>    Finished dev <span style="color:#fe8019">[</span>unoptimized + debuginfo<span style="color:#fe8019">]</span> target<span style="color:#fe8019">(</span>s<span style="color:#fe8019">)</span> in 0.44s
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Copy to `wish` to avoid changing all of the tests; it&#39;s not super important what the file is called.</span>
+</span></span><span style="display:flex;"><span>cp ./target/debug/wishr ./tester/wish
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">cd</span> ./tester <span style="color:#fe8019">&amp;&amp;</span> ./test-wishr.sh
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">test</span> 1: 1.out incorrect
+</span></span><span style="display:flex;"><span>  what results should be found in file: tests/1.out
+</span></span><span style="display:flex;"><span>  what results produced by your program: tests-out/1.out
+</span></span><span style="display:flex;"><span>  compare the two using diff, cmp, or related tools to debug, e.g.:
+</span></span><span style="display:flex;"><span>  prompt&gt; diff tests/1.out tests-out/1.out
+</span></span><span style="display:flex;"><span>  See tests/1.run <span style="color:#fe8019">for</span> what is being run
+</span></span><span style="display:flex;"><span>make: *** <span style="color:#fe8019">[</span>test-integration<span style="color:#fe8019">]</span> Error <span style="color:#d3869b">1</span>
+</span></span></code></pre></div><p>It looks like our program that prints out &ldquo;Hello, wishr!&rdquo; doesn&rsquo;t pass all of the tests. Bummer! &#x1f604;</p>
+<h2 id="vagrant">
+  Vagrant
+  <a class="heading-link" href="#vagrant">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The last big piece of this commit is a Vagrantfile. <a href="https://developer.hashicorp.com/vagrant/intro"  class="external-link" target="_blank" rel="noopener">Vagrant</a> allows us to quickly and consistently spin up virtual machines. I am developing on a Mac, but I&rsquo;d like to have a Linux machine to test with, and the short Vagrantfile in the commit will allow me to run one with <code>vagrant up</code>.</p>
+<p>The machine is based on the latest (currently) version of Ubuntu, Mantic Minotaur. It will install common software build tooling along with the Rust toolchain while it comes up. Once the Vagrant machine is running, I can <code>vagrant ssh</code> into it, move to the <code>/vagrant</code> directory, and then test wishr within Linux.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I&rsquo;m sure I&rsquo;ll come back and revisit many of these initial pieces over time. However, with that, I think the repo is in a good spot to begin development!</p>
+
+      </div>
+
+
+      <footer>
+        
+
+<section class="see-also">
+  
+    
+    
+    
+      <h3 id="see-also-in-wishr">
+        See also in wishr
+        <a class="heading-link" href="#see-also-in-wishr">
+          <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+          <span class="sr-only">Link to heading</span>
+        </a>
+      </h3>
+      <nav>
+        <ul>
+        
+        
+          
+        
+          
+            <li>
+              <a href="/articles/2023/11/25/wishr-a-small-shell-written-in-rust/">wishr - A Small Shell Written in Rust</a>
+            </li>
+          
+        
+        </ul>
+      </nav>
+    
+  
+</section>
+
+
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+        [v. 1420579]
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
