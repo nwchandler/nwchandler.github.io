@@ -4,21 +4,35 @@
     <title>Tags on Nick Chandler</title>
     <link>https://nickchandler.dev/tags/</link>
     <description>Recent content in Tags on Nick Chandler</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 29 Nov 2023 09:09:15 -0500</lastBuildDate>
+    <lastBuildDate>Sat, 21 Sep 2024 23:30:34 -0400</lastBuildDate>
     <atom:link href="https://nickchandler.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>wishr</title>
+      <title>Mikado Method</title>
+      <link>https://nickchandler.dev/tags/mikado-method/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://nickchandler.dev/tags/mikado-method/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Software Engineering</title>
+      <link>https://nickchandler.dev/tags/software-engineering/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://nickchandler.dev/tags/software-engineering/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Wishr</title>
       <link>https://nickchandler.dev/tags/wishr/</link>
-      <pubDate>Wed, 29 Nov 2023 09:09:15 -0500</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://nickchandler.dev/tags/wishr/</guid>
       <description></description>
     </item>
     <item>
-      <title>rust</title>
+      <title>Rust</title>
       <link>https://nickchandler.dev/tags/rust/</link>
-      <pubDate>Sat, 25 Nov 2023 22:01:00 -0500</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://nickchandler.dev/tags/rust/</guid>
       <description></description>
     </item>

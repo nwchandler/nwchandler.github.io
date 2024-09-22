@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>wishr on Nick Chandler</title>
+    <title>Wishr on Nick Chandler</title>
     <link>https://nickchandler.dev/tags/wishr/</link>
-    <description>Recent content in wishr on Nick Chandler</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <description>Recent content in Wishr on Nick Chandler</description>
+    <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 29 Nov 2023 09:09:15 -0500</lastBuildDate>
+    <lastBuildDate>Sat, 21 Sep 2024 23:29:53 -0400</lastBuildDate>
     <atom:link href="https://nickchandler.dev/tags/wishr/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>wishr Repo Setup</title>
       <link>https://nickchandler.dev/articles/2023/11/29/wishr-repo-setup/</link>
       <pubDate>Wed, 29 Nov 2023 09:09:15 -0500</pubDate>
       <guid>https://nickchandler.dev/articles/2023/11/29/wishr-repo-setup/</guid>
-      <description>In the previous post, I described why I&amp;rsquo;m writing a small Unix shell, which I&amp;rsquo;m calling wishr, along with a bit of an overview of how I plan to approach the project. I&amp;rsquo;m excited to get started on the shell, itself, but it&amp;rsquo;s important to get a new repo set up for success. So, in this post, I&amp;rsquo;ll go through the initial repository setup I&amp;rsquo;ve gone with.
-If you&amp;rsquo;d like to look at the specific git commit, here it is!</description>
+      <description>In the previous post, I described why I&amp;rsquo;m writing a small Unix shell, which I&amp;rsquo;m calling wishr, along with a bit of an overview of how I plan to approach the project. I&amp;rsquo;m excited to get started on the shell, itself, but it&amp;rsquo;s important to get a new repo set up for success. So, in this post, I&amp;rsquo;ll go through the initial repository setup I&amp;rsquo;ve gone with.&#xA;If you&amp;rsquo;d like to look at the specific git commit, here it is!</description>
     </item>
     <item>
       <title>wishr - A Small Shell Written in Rust</title>
       <link>https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/</link>
       <pubDate>Sat, 25 Nov 2023 22:01:00 -0500</pubDate>
       <guid>https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/</guid>
-      <description>This is the first post in a series where I plan to document my experience writing a small Unix shell in Rust called wishr. In this post, I&amp;rsquo;ll describe why I&amp;rsquo;m starting this project and how I plan to proceed through it.
-Why write a shell? Link to heading First off, to be clear, I have no intention to make a production quality shell: Bash, Z Shell, fish, and the like, can all breathe a sigh of relief here!</description>
+      <description>This is the first post in a series where I plan to document my experience writing a small Unix shell in Rust called wishr. In this post, I&amp;rsquo;ll describe why I&amp;rsquo;m starting this project and how I plan to proceed through it.&#xA;Why write a shell? Link to heading First off, to be clear, I have no intention to make a production quality shell: Bash, Z Shell, fish, and the like, can all breathe a sigh of relief here!</description>
     </item>
   </channel>
 </rss>

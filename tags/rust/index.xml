@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>rust on Nick Chandler</title>
+    <title>Rust on Nick Chandler</title>
     <link>https://nickchandler.dev/tags/rust/</link>
-    <description>Recent content in rust on Nick Chandler</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <description>Recent content in Rust on Nick Chandler</description>
+    <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 25 Nov 2023 22:01:00 -0500</lastBuildDate>
+    <lastBuildDate>Sun, 26 Nov 2023 00:02:31 -0500</lastBuildDate>
     <atom:link href="https://nickchandler.dev/tags/rust/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>wishr - A Small Shell Written in Rust</title>
       <link>https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/</link>
       <pubDate>Sat, 25 Nov 2023 22:01:00 -0500</pubDate>
       <guid>https://nickchandler.dev/articles/2023/11/25/wishr-a-small-shell-written-in-rust/</guid>
-      <description>This is the first post in a series where I plan to document my experience writing a small Unix shell in Rust called wishr. In this post, I&amp;rsquo;ll describe why I&amp;rsquo;m starting this project and how I plan to proceed through it.
-Why write a shell? Link to heading First off, to be clear, I have no intention to make a production quality shell: Bash, Z Shell, fish, and the like, can all breathe a sigh of relief here!</description>
+      <description>This is the first post in a series where I plan to document my experience writing a small Unix shell in Rust called wishr. In this post, I&amp;rsquo;ll describe why I&amp;rsquo;m starting this project and how I plan to proceed through it.&#xA;Why write a shell? Link to heading First off, to be clear, I have no intention to make a production quality shell: Bash, Z Shell, fish, and the like, can all breathe a sigh of relief here!</description>
     </item>
   </channel>
 </rss>

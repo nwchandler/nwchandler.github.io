@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Software Engineering on Nick Chandler</title>
+    <link>https://nickchandler.dev/tags/software-engineering/</link>
+    <description>Recent content in Software Engineering on Nick Chandler</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 21 Sep 2024 23:30:34 -0400</lastBuildDate>
+    <atom:link href="https://nickchandler.dev/tags/software-engineering/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Faster Software Development with the Mikado Method</title>
+      <link>https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/</link>
+      <pubDate>Sat, 21 Sep 2024 00:37:00 -0400</pubDate>
+      <guid>https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/</guid>
+      <description>As a software engineer, have you ever faced a complex project where every task seems to depend on another? My team at HashiCorp ran into just that — and found a method that helped us tackle those interdependencies in a way that lets us make smooth progress. Here’s how the Mikado Method improved our workflow.&#xA;The Challenge Link to heading About a year ago, my team at HashiCorp tried something new.</description>
+    </item>
+  </channel>
+</rss>

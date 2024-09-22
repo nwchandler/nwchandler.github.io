@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Faster Software Development with the Mikado Method · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="This article describes how my team at work uses the Mikado Method.">
+<meta name="keywords" content="blog,developer">
+<meta name="fediverse:creator" content="" />
+
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Faster Software Development with the Mikado Method">
+<meta name="twitter:description" content="This article describes how my team at work uses the Mikado Method.">
+
+<meta property="og:url" content="https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="Faster Software Development with the Mikado Method">
+  <meta property="og:description" content="This article describes how my team at work uses the Mikado Method.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-09-21T00:37:00-04:00">
+    <meta property="article:modified_time" content="2024-09-21T23:30:34-04:00">
+    <meta property="article:tag" content="Software Engineering">
+    <meta property="article:tag" content="Mikado Method">
+
+
+
+
+<link rel="canonical" href="https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.aa5ef26fa979d6793724ae2dbd71efa94fd16cb1c5c7db3b6651f21f9892a5fd.css" integrity="sha256-ql7yb6l51nk3JK4tvXHvqU/RbLHFx9s7ZlHyH5iSpf0=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://nickchandler.dev/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/">
+              Faster Software Development with the Mikado Method
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-09-21T00:37:00-04:00">
+                September 21, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              11-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/software-engineering/">Software Engineering</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/mikado-method/">Mikado Method</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>As a software engineer, have you ever faced a complex project where every task seems to depend on another? My team at HashiCorp ran into just that — and found a method that helped us tackle those interdependencies in a way that lets us make smooth progress. Here’s how the <strong>Mikado Method</strong> improved our workflow.</p>
+<h2 id="the-challenge">
+  The Challenge
+  <a class="heading-link" href="#the-challenge">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>About a year ago, my team at HashiCorp tried something new. Our small team was beginning development on a new capability that would require changes to several libraries and a web service, with lots of interdependencies between them. To complicate matters, other teams were waiting on parts of our work to start theirs. We wanted a way that we could all make progress in parallel without the risk of constantly getting blocked by unfinished dependencies.</p>
+<p>I had stumbled across the <a href="https://www.manning.com/books/the-mikado-method"  class="external-link" target="_blank" rel="noopener">Mikado Method</a> online a couple of years earlier. I tried it while working for my employer at the time, and I found that it helped me refactor code in a focused way. At HashiCorp, we decided to trial it as a team for this new project, and it worked so well that we&rsquo;ve integrated it into our process for most projects since. It has boosted our team velocity, simplified code reviews, and enabled us to split work more efficiently.</p>
+<h2 id="what-is-the-mikado-method">
+  What is The Mikado Method?
+  <a class="heading-link" href="#what-is-the-mikado-method">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The creators of the method, Daniel Brolund and Ola Ellnestam, describe its purpose in the preface to <a href="https://www.manning.com/books/the-mikado-method"  class="external-link" target="_blank" rel="noopener">their book</a>:</p>
+<blockquote>
+<p>The Mikado Method is our guide to morphing [software systems]. It helps us visualize, plan, and perform business-value-focused improvements over several iterations and increments of work, without ever having a broken codebase. It enhances communication, collaboration, and learning in software development teams. It also helps individuals and programming pairs stay on track while doing their day-to-day work. The framework that the method provides can help the whole team morph any system into the desired new shape.</p>
+</blockquote>
+<p>At its core, the Mikado Method is very straightforward. In fact, I feel like the essence of the technique is probably the kind of thing that some engineers would do intuitively and never think to give it a name. But it does have <em>just enough</em> rigor that it is easier said than done.</p>
+<h3 id="how-it-works">
+  How it Works
+  <a class="heading-link" href="#how-it-works">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The process is essentially this, assuming you start from a point where you need to add some behavior to your code. You&rsquo;ll need some paper, a whiteboard, or drawing software, so keep it handy!</p>
+<ol>
+<li>Start a new development branch in your version control system of choice. (I&rsquo;ll assume git.)</li>
+<li>On your paper, jot down a quick description of the behavior you’re adding inside a circle — no need for long explanations.</li>
+<li>Attempt to implement the new behavior naively and quickly.
+<ul>
+<li>&#x2705; If it works: You&rsquo;re done! Commit the change (or open a PR), put a big check mark on the task on your drawing, and move on to the next task!</li>
+<li>&#x1f6d1; But if it gets too complex: Stop. <strong>GO TO STEP 4</strong>.</li>
+</ul>
+</li>
+<li>Stop and think about the things that are getting in your way. What kinds of things would be helpful if they had already been completed, which would allow you to trivially make progress on this task. Taking a term I&rsquo;ve heard from <a href="https://bitfieldconsulting.com/"  class="external-link" target="_blank" rel="noopener">John Arundel</a>, are there any &ldquo;magic functions&rdquo; that would help you? In other words, if only some function existed already that did X, then implementing this current behavior would be much easier.</li>
+<li>Decide which one(s) of the ideas you had in step 4 would be most helpful to you. Then, draw a circle on your paper for each of them, again with short descriptions. Draw a line from the task you were working on to each of these, with an arrow pointing at the new tasks. These arrows indicate that these tasks should actually be done before the current one.</li>
+<li>Now for the hard part: Delete your current development branch (yes, delete it!). Start on one of the pre-requisite tasks. Repeat the process as needed, diving deeper into dependencies.</li>
+</ol>
+<h3 id="delete-my-work-huh">
+  Delete My Work, Huh??
+  <a class="heading-link" href="#delete-my-work-huh">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Deleting changes you&rsquo;ve been working on can be difficult! If you really can&rsquo;t bring yourself to delete it, stash it, but I encourage you not to do this! You might feel like you&rsquo;ve made good progress, but continuing on down the rabbit hole can lead to unreviewable pull requests for your team and a lot of cognitive load for yourself.</p>
+<p>You might be worried about how you&rsquo;ll remember what you previously did. That&rsquo;s what the graph is for. You&rsquo;ll still have a record of what you needed in the little circle you drew in step 2. You can come back to it once all of its pre-requisites are complete.</p>
+<blockquote>
+<p><em>Aside:</em> Even though I&rsquo;ve used the technique for a while now, I still fall victim to thinking I&rsquo;m &ldquo;just about done&rdquo; and keep digging myself into a deeper hole every now and then. Each time I do this, I come away wishing I had just deleted my branch, made some new tasks, and stuck to the process.</p>
+</blockquote>
+<h3 id="recursive-exploration-turtles-all-the-way-down">
+  Recursive Exploration: Turtles All the Way Down
+  <a class="heading-link" href="#recursive-exploration-turtles-all-the-way-down">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>You may also (correctly!) observe that this process is recursive. The pre-requisites can, themselves, turn out to have pre-requisites of their own. I like to think of the method as a depth-first search of all of the pre-requisites. Once you get to the farthest depths, you&rsquo;re finally at a point where you can make code changes. The farther down you go, the better you also tend to understand the existing code and how best to change it!</p>
+<h3 id="unplanned-interruptions-no-problem">
+  Unplanned Interruptions? No Problem
+  <a class="heading-link" href="#unplanned-interruptions-no-problem">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In addition to making the code changes small and manageable, there is another key benefit to this approach. Let&rsquo;s say you make a few small changes, but then something happens, and you have to shift gears. Maybe you have personal commitments come up, work priorities change, or whatever the case may be. Well, when it&rsquo;s time to come back to the thing you&rsquo;re working on, you will have made some actual progress (small chunks of code already added to your code base), without having to try and reload all the context of a huge development branch into your head.</p>
+<p>This small, incremental progress, is especially great when you&rsquo;re working on <a href="https://en.wikipedia.org/wiki/Technical_debt"  class="external-link" target="_blank" rel="noopener">Tech Debt</a>. Fixing Tech Debt is important, can be quite difficult to finish, and is also likely to get bumped by feature development in corporate settings. (Not talking about my employer here! &#x1f604;) And, if you&rsquo;re working on a team, and a colleague is able to pick this back up before you, then they have your contributions already, plus that chart you created, and they can find a task to work on, themselves.</p>
+<h3 id="an-example">
+  An Example
+  <a class="heading-link" href="#an-example">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The Mikado chart is the critical artifact from the method, so let&rsquo;s consider an example, even if it is a bit contrived. Let&rsquo;s say you have written a command line interface application that counts the number of lines in a document. As great as it is, you feel like it would be even better if it could count the words in documents too, though! You&rsquo;d like for users to be able to give it a file, tell it that they want to know the number of words, and it obeys.</p>
+<p>Deciding to give the method a shot, you write down a brief description (&ldquo;Add Word Count Mode&rdquo;) to your paper and get started. You start writing code and before long realize a couple things: 1) You have your current implementation all directly within the <code>main</code> function; and, 2) You don&rsquo;t have a way to actually tell whether a user wants lines or words. So, you draw a couple pre-requisites for these.</p>
+<p>You decide to move down a level and explore counting words when the user provides a flag, <code>-w</code>. Unfortunately, your program doesn&rsquo;t parse flags yet, and even if it did, it would be better to call a function to count words rather than putting this into <code>main</code>. Now you start on the function to count words, and you decide, &ldquo;Hey, it sure would be nice if I could get a list of the words in a string, where each element was the text in between spaces.&rdquo;</p>
+<p>Before long, you have something that looks maybe, sort-of something like the drawing below.</p>
+<p><img alt="Example Mikado Chart" src="/articles/2024/09/21/faster-software-development-with-the-mikado-method/mikado-example.png"></p>
+<p>It&rsquo;s a somewhat trivial example and probably misses some actual steps that a person would find if they were to actually need to implement such functionality. But hopefully this helps to demonstrate what a Mikado chart looks like and how it shows interdependencies.</p>
+<h2 id="how-we-use-the-mikado-method-for-project-planning">
+  How We Use the Mikado Method for Project Planning
+  <a class="heading-link" href="#how-we-use-the-mikado-method-for-project-planning">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The description above is how an individual or team could deconstruct work into smaller chunks <em>as</em> they are developing a capability. But how do we use it for project planning? Well, actually not that differently to be honest!</p>
+<p>As with most teams at HashiCorp, before we commit to implementing major capabilities, we document how a system or feature should work at a high level in <a href="https://works.hashicorp.com/articles/rfc-template"  class="external-link" target="_blank" rel="noopener">Requests for Comments</a>. Documents, though, are very linear. They describe how the overall system should work, but they aren&rsquo;t project plans. We use the Mikado Method to get us from the proposal of an RFC to a set of tickets in our project tracking system (we use <a href="https://www.atlassian.com/software/jira"  class="external-link" target="_blank" rel="noopener">Jira</a>) that the team can work on collectively.</p>
+<p>We are a remote team and have folks working across time zones. So, we keep our Mikado charts online. We use <a href="https://lucidspark.com/"  class="external-link" target="_blank" rel="noopener">LucidSpark</a> for this, which allows us to all see any changes to the chart in realtime, and it also has the added benefit of a Jira integration that makes it quite easy to create tickets from items on the board.</p>
+<h3 id="initial-draft">
+  Initial Draft
+  <a class="heading-link" href="#initial-draft">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Typically, if one person on the team was the lead author of a particular RFC, that person will take a first pass at a Mikado chart, with the overall goal at the top of the chart and ever-smaller subcomponents below, with arrows to appropriately indicate dependencies. A common practice is to &ldquo;spike&rdquo; a bit, where we might begin writing pseudocode with references to the magic functions that would help achieve the goal. Once we have some ideas of these functions, we iterate on that process for each of those. We don&rsquo;t expect that this draft will be fully complete, but it generally serves as a great starting point.</p>
+<h3 id="team-review">
+  Team Review
+  <a class="heading-link" href="#team-review">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Once we have this draft, the team will review it together on a Zoom call. The person who created it will walk through the chart, either bottom-up or top-down, and describe the thought process. There are usually lots of questions, folks will find things missing, the short task descriptions will be made clearer, and we end up with a chart that we all feel represents the work to be done and how each task affects other tasks. It&rsquo;s also common that other members of the team have created charts for features that could potentially benefit from some of the tasks here, and we sort out those as dependencies as well.</p>
+<h3 id="ticket-creation">
+  Ticket Creation
+  <a class="heading-link" href="#ticket-creation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>After we&rsquo;ve met and agreed on the overall plan, the chart creator will go through and create Jira tasks to correlate to each task in the chart. Again, this is just a matter of tooling, and we are pretty happy with LucidSpark for this since it integrates well with Jira. We&rsquo;re careful to ensure the tasks in Jira are linked appropriately (e.g., &ldquo;task Y is blocked by task X but blocks task Z&rdquo;).</p>
+<h3 id="time-to-code">
+  Time to Code!
+  <a class="heading-link" href="#time-to-code">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Then, when it&rsquo;s time to work on the feature, we almost always have several unblocked, small chunks of work, and anyone on the team is free to pick up and work on any of those tickets. If someone picks up a ticket and finds that it actually isn&rsquo;t quite as cut-and-dry as expected, then they go back through the Mikado process for this particular task, dividing it up further, adding it to the chart, and creating more tickets as needed. As pre-requisites are completed, more tickets become unblocked, and we iterate on this process until we&rsquo;re finished.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>We have gone through this process as a team several times by now. We have found that it allows us to make fast progress on both new feature development as well as general maintenance work. It also helps us to get everyone working in similar areas of code, which helps with knowledge sharing; it&rsquo;s less common that one person develops a whole subsystem and becomes the only person who understands it.</p>
+<p>If you&rsquo;re looking for a way to tackle your next project, give the Mikado Method a try - it just might change how you work!</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2024
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+        [v. 771a7f3]
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+  
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
