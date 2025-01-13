@@ -6,8 +6,43 @@
     <description>Recent content in Tags on Nick Chandler</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 21 Sep 2024 23:30:34 -0400</lastBuildDate>
+    <lastBuildDate>Sun, 12 Jan 2025 16:30:45 -0500</lastBuildDate>
     <atom:link href="https://nickchandler.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux</title>
+      <link>https://nickchandler.dev/tags/linux/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://nickchandler.dev/tags/linux/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Operating Systems</title>
+      <link>https://nickchandler.dev/tags/operating-systems/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://nickchandler.dev/tags/operating-systems/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Os</title>
+      <link>https://nickchandler.dev/tags/os/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://nickchandler.dev/tags/os/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Unix</title>
+      <link>https://nickchandler.dev/tags/unix/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://nickchandler.dev/tags/unix/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Xv6</title>
+      <link>https://nickchandler.dev/tags/xv6/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://nickchandler.dev/tags/xv6/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Mikado Method</title>
       <link>https://nickchandler.dev/tags/mikado-method/</link>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>IPC on Nick Chandler</title>
+    <link>http://localhost:1313/tags/ipc/</link>
+    <description>Recent content in IPC on Nick Chandler</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 12 Jan 2025 16:30:45 -0500</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/ipc/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>An Overview of Interprocess Communication Using Pipes on a Unix-Like System</title>
+      <link>http://localhost:1313/articles/2025/01/12/an-overview-of-interprocess-communication-using-pipes-on-a-unix-like-system/</link>
+      <pubDate>Sun, 12 Jan 2025 16:30:45 -0500</pubDate>
+      <guid>http://localhost:1313/articles/2025/01/12/an-overview-of-interprocess-communication-using-pipes-on-a-unix-like-system/</guid>
+      <description>I&amp;rsquo;ve recently started an effort to learn more about operating systems, particularly Unix-like systems. To start with, I am using the online book xv6: a simple, Unix-like teaching operating system, along with the code available on GitHub. As the name suggests, xv6 is a minimal operating system, based on Unix (as are many other real-world operating systems today), designed for teaching and learning. It doesn&amp;rsquo;t include many of the key capabilities you would expect in a production-grade OS, but the foundational capabilities of an OS kernel are there.</description>
+    </item>
+  </channel>
+</rss>
