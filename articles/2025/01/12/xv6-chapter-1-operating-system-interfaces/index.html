@@ -28,7 +28,7 @@
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
     <meta property="article:published_time" content="2025-01-12T16:30:45-05:00">
-    <meta property="article:modified_time" content="2025-01-12T16:30:45-05:00">
+    <meta property="article:modified_time" content="2025-01-12T23:29:54-05:00">
     <meta property="article:tag" content="Linux">
     <meta property="article:tag" content="Unix">
     <meta property="article:tag" content="Os">
@@ -207,10 +207,10 @@
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
-<p>A process is a running instance of a program. One process can create a new process in xv6 using the <code>fork</code> system call. (Other Unix-like systems have other mechanisms for creating processes as well.) Each process has a parent process, and a parent process may have many child processes.</p>
-<p>After forking, a child will be in the same state as the parent, including sharing copies of existing variables, open files, and it will even be on the same line of the program as the parent. There is a Unix convention that the Process ID (PID) following <code>fork</code> is 0 inside the child process and a positive integer of the actual PID inside the parent process. This is how a program can diverge behavior following a fork, depending on if it is the parent or child process.</p>
-<p>A process can replace itself with another process by using the <code>exec</code> system call. This can be tied nicely together with <code>fork</code>. For example, in a shell application, when running an executable, the shell will <code>fork</code> a child process and then <code>exec</code> the application inside the child process.</p>
-<p>In general, a parent process should not exit until its children have also exited. The <code>wait</code> system call enables this, by allowing the parent to wait on one or more children to change their status.</p>
+<p>A process is a running instance of a program. One process can create a new one in xv6 using the <code>fork</code> system call. (Other Unix-like systems have other mechanisms for creating processes as well.) Each process has a parent, and a parent process may have many children.</p>
+<p>After forking, a child will be in the same state as the parent, including sharing copies of existing variables, open files, and it will even be on the same line of the program as the parent. There is a Unix convention that the Process ID (PID) following <code>fork</code> is 0 inside the child process and a positive integer of the actual PID inside the parent. This is how a program can diverge behavior following a fork, depending on if it is the parent or child.</p>
+<p>A process can replace itself with another by using the <code>exec</code> system call. This can be tied nicely together with <code>fork</code>. For example, in a shell application, when running an executable, the shell will <code>fork</code> a child process and then <code>exec</code> the application inside the child.</p>
+<p>In general, a parent should not exit until its children have also exited. The <code>wait</code> system call enables this, by allowing the parent to wait on one or more children to change their status.</p>
 <h3 id="io-and-file-descriptors">
   I/O and File Descriptors
   <a class="heading-link" href="#io-and-file-descriptors">
@@ -305,6 +305,8 @@
         Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
             href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
 
+        
+        [v. 88fe516]
         
 
     </section>
