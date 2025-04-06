@@ -3,37 +3,40 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://nickchandler.dev/tags/linux/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/operating-systems/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/os/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/posts/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/series/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/unix/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/xv6/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/series/xv6/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/articles/2025/04/05/xv6-chapter-2-operating-system-organization/</loc>
+    <lastmod>2025-04-06T16:35:09-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/articles/2025/01/12/xv6-chapter-1-operating-system-interfaces/</loc>
-    <lastmod>2025-01-12T23:29:54-05:00</lastmod>
+    <lastmod>2025-04-06T16:34:51-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/</loc>
     <lastmod>2024-09-21T23:30:34-04:00</lastmod>

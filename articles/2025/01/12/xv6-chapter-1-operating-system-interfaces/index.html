@@ -15,10 +15,12 @@
 <meta name="author" content="Nick Chandler">
 <meta name="description" content="This article is a summary of key takeaways from chapter 1 of the xv6 book.">
 <meta name="keywords" content="blog,developer">
-<meta name="fediverse:creator" content="" />
 
-<meta name="twitter:card" content="summary"><meta name="twitter:title" content="xv6 Chapter 1: Operating System Interfaces">
-<meta name="twitter:description" content="This article is a summary of key takeaways from chapter 1 of the xv6 book.">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="xv6 Chapter 1: Operating System Interfaces">
+  <meta name="twitter:description" content="This article is a summary of key takeaways from chapter 1 of the xv6 book.">
 
 <meta property="og:url" content="https://nickchandler.dev/articles/2025/01/12/xv6-chapter-1-operating-system-interfaces/">
   <meta property="og:site_name" content="Nick Chandler">
@@ -28,12 +30,13 @@
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
     <meta property="article:published_time" content="2025-01-12T16:30:45-05:00">
-    <meta property="article:modified_time" content="2025-01-12T23:29:54-05:00">
+    <meta property="article:modified_time" content="2025-04-06T16:34:51-04:00">
     <meta property="article:tag" content="Linux">
     <meta property="article:tag" content="Unix">
     <meta property="article:tag" content="Os">
     <meta property="article:tag" content="Operating Systems">
     <meta property="article:tag" content="Xv6">
+      <meta property="og:see_also" content="https://nickchandler.dev/articles/2025/04/05/xv6-chapter-2-operating-system-organization/">
 
 
 
@@ -48,7 +51,7 @@
 
   
   
-  <link rel="stylesheet" href="/css/coder.min.aa5ef26fa979d6793724ae2dbd71efa94fd16cb1c5c7db3b6651f21f9892a5fd.css" integrity="sha256-ql7yb6l51nk3JK4tvXHvqU/RbLHFx9s7ZlHyH5iSpf0=" crossorigin="anonymous" media="screen" />
+  <link rel="stylesheet" href="/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
 
 
 
@@ -250,7 +253,7 @@
 </h3>
 <p>Chapter 1 in the xv6 book has an exercise that asks you to write a program that forks a child and then enables &ldquo;ping-ponging&rdquo; data between the two processes using a set of pipes. My implementation of the exercise is in a <a href="https://gist.github.com/nwchandler/f30e81153bc6c16dc119b60571e619be"  class="external-link" target="_blank" rel="noopener">GitHub gist</a>. I&rsquo;ve tried to add comments and debug statements to show how all of the concepts described in the previous sections tie together to enable this.</p>
 <p>The exercise was a great way for me to dust off some of my C skills. I tried to avoid doing too many Google searches for help with crafting calls to the C standard library and, instead, focused on spending some quality time with the man pages!</p>
-<p>Although I ultimately changed the design a bit, one of the key things I learned from this exercise was the importance of closing file descriptors after duplicating them! I wanted the parent process to wait for the child to exit, but I found that my first attesmpts deadlocked. A key aspect of pipes is that they will only close when ALL file descriptors pointing to them are removed, much like how an inode can only be removed when all its links are removed. However, although I thought I had closed all of my file dcriptors, I forgot about some duplicates that came about after the fork.</p>
+<p>Although I ultimately changed the design a bit, one of the key things I learned from this exercise was the importance of closing file descriptors after duplicating them! I wanted the parent process to wait for the child to exit, but I found that my first attempts deadlocked. A key aspect of pipes is that they will only close when ALL file descriptors pointing to them are removed, much like how an inode can only be removed when all its links are removed. However, although I thought I had closed all of my file descriptors, I forgot about some duplicates that came about after the fork.</p>
 <h2 id="conclusion">
   Conclusion
   <a class="heading-link" href="#conclusion">
@@ -272,6 +275,28 @@
     
     
     
+      <h3 id="see-also-in-xv6">
+        See also in xv6
+        <a class="heading-link" href="#see-also-in-xv6">
+          <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+          <span class="sr-only">Link to heading</span>
+        </a>
+      </h3>
+      <nav>
+        <ul>
+        
+        
+          
+            <li>
+              <a href="/articles/2025/04/05/xv6-chapter-2-operating-system-organization/">xv6 Chapter 2: Operating System Organization</a>
+            </li>
+          
+        
+          
+        
+        </ul>
+      </nav>
+    
   
 </section>
 
@@ -281,7 +306,6 @@
         
         
         
-
         
         
       </footer>
@@ -306,7 +330,7 @@
             href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
 
         
-        [v. 88fe516]
+        [v. c243f5c]
         
 
     </section>
@@ -327,9 +351,8 @@
 
 
   
+
   
-
-
 
   
 
@@ -361,5 +384,4 @@
 
   
 </body>
-
 </html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  xv6 Chapter 2: Operating System Organization · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="This article is a summary of key takeaways from chapter 2 of the xv6 book.">
+<meta name="keywords" content="blog,developer">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="xv6 Chapter 2: Operating System Organization">
+  <meta name="twitter:description" content="This article is a summary of key takeaways from chapter 2 of the xv6 book.">
+
+<meta property="og:url" content="https://nickchandler.dev/articles/2025/04/05/xv6-chapter-2-operating-system-organization/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="xv6 Chapter 2: Operating System Organization">
+  <meta property="og:description" content="This article is a summary of key takeaways from chapter 2 of the xv6 book.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-05T23:06:37-04:00">
+    <meta property="article:modified_time" content="2025-04-06T16:35:09-04:00">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="Unix">
+    <meta property="article:tag" content="Os">
+    <meta property="article:tag" content="Operating Systems">
+    <meta property="article:tag" content="Xv6">
+      <meta property="og:see_also" content="https://nickchandler.dev/articles/2025/01/12/xv6-chapter-1-operating-system-interfaces/">
+
+
+
+
+<link rel="canonical" href="https://nickchandler.dev/articles/2025/04/05/xv6-chapter-2-operating-system-organization/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://nickchandler.dev/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://nickchandler.dev/articles/2025/04/05/xv6-chapter-2-operating-system-organization/">
+              xv6 Chapter 2: Operating System Organization
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2025-04-05T23:06:37-04:00">
+                April 5, 2025
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/linux/">Linux</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/unix/">Unix</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/os/">Os</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/operating-systems/">Operating Systems</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/xv6/">Xv6</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>After a bit of an unexpected break, I have been able to get back to my operating systems study. So, let&rsquo;s take a look at some of the key ideas in chapter 2 of the xv6 book!</p>
+<h2 id="operating-system-organization">
+  Operating System Organization
+  <a class="heading-link" href="#operating-system-organization">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In the introduction to the chapter, the authors claim:</p>
+<blockquote>
+<p>[A]n operating system must fulfill three requirements: multiplexing, isolation, and interaction.</p></blockquote>
+<p><strong>Multiplexing</strong> refers to multiple programs being able to run on the computer, ideally without any one program hogging time or resources. <strong>Isolation</strong> means that the operating system must protect programs from one another. And, <strong>interaction</strong> means that the OS must allow programs to communicate with each other in a safe manner.</p>
+<p>The rest of the chapter describes how operating system kernels are organized to meet these requirements, with xv6 as an example.</p>
+<h3 id="multiplexing">
+  Multiplexing
+  <a class="heading-link" href="#multiplexing">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>An operating system must support scheduling the execution of potentially many independent programs, allowing each program to have a fair share of system resources, such as processor time. This should be true even in the case where the number of programs executing is greater than the number of physical processors in the computer - a very common situation!</p>
+<p>One could imagine a scenario where each program would run for a period of time and then yield to other programs. This arrangement is known as <em>cooperative scheduling</em>. Although it could work in some applications (for example, embedded systems), it is not a good idea to assume that all programs running on a computer will cooperate with one another in this way. It also makes programs more complex to write.</p>
+<p>Instead, an operating system maintains some state for each program. The abstraction is called the <em>process</em>, which is the fundamental unit for both multiplexing and isolation. The OS runs a process for a while, then saves its state (like registers and the stack) before switching to another. Each process is not aware of this swapping: the kernel handles it for them.</p>
+<h3 id="isolation">
+  Isolation
+  <a class="heading-link" href="#isolation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In addition to the runtime state, like stack and register values, each process is given its own <em>address space</em>. Other processes cannot access this address space, so that they cannot view or change data in this process&rsquo;s memory.</p>
+<p>xv6, like other Unixes, provide processes with <em>virtual addresses</em> rather than <em>physical addresses</em> to reference memory. When a process requests the contents of some virtual address, <code>vA</code>, the kernel and the processor work together to map this to a physical address, <code>pB</code>.</p>
+<p>By multiplexing processes and providing each with its own address space, Unix gives each process the illusion that it is the only one running on its own machine. This abstraction simplifies programs by hiding physical memory details from the process. For instance, virtual memory means that each process will believe its memory starts at address 0 and goes all the way up to the total memory on the system. Compilers, then, can use these virtual addresses to put static data and stack elements at the same virtual address in all executions of the process, while the OS and hardware actually do the translation to make this work.</p>
+<h4 id="hardware-support-for-isolation">
+  Hardware Support for Isolation
+  <a class="heading-link" href="#hardware-support-for-isolation">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>The OS and hardware work closely to provide isolation. Not only must processes be protected from one another, but even more importantly, the kernel must be protected from buggy or malicious programs as well. If a process were to attempt to write to a memory address owned by the kernel, the processor should detect that and return execution back to the kernel by way of a <em>page fault</em>. The kernel may then handle the access violation, typically by terminating the offending process. The implementation here relies on <em>page tables</em>, and since those are the subject of chapter 3, there will be more to come there in the next post of the series.</p>
+<p>Additionally, though, instructions can be run in one of several modes. Because xv6 is designed to run on <a href="https://riscv.org/"  class="external-link" target="_blank" rel="noopener">RISC-V</a> processors, there are three modes to be aware of: <em>machine mode</em>, <em>supervisor mode</em>, and <em>user mode</em>. Other architectures have similar concepts, but with different names and details.</p>
+<p>Machine mode is typically reserved for the process of booting a computer up; instructions in machine mode have full access to the system, which is required in the process of starting up the operating system. Supervisor mode is the common mode of operation for kernel tasks, such as system calls. Here, the kernel can read and write interrupts and make adjustments to the page table. User mode is where typical user applications run. Attempts to execute privileged instructions while in user mode will trigger the processor to return execution to the kernel, so that it can handle it.</p>
+<h3 id="interaction">
+  Interaction
+  <a class="heading-link" href="#interaction">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The chapter does not spend much time on the third requirement, but does state that processes should not be completely isolated from one another. There are times where two or more processes need to collaborate. The OS provides communication mechanisms, such as pipes (discussed in <a href="/articles/2025/01/12/xv6-chapter-1-operating-system-interfaces/" >chapter 1</a>), to allow such interaction.</p>
+<h2 id="exercise-adding-a-system-call-to-xv6">
+  Exercise: Adding a System Call to xv6
+  <a class="heading-link" href="#exercise-adding-a-system-call-to-xv6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The chapter ends with an exercise:</p>
+<blockquote>
+<p>Add a system call to xv6 that returns the amount of free memory available.</p></blockquote>
+<p>I think this is an open-ended exercise, but I took it to mean to provide a system call that would allow implementing a minimal version of the <code>free</code> command available on many Unix systems. In other words, rather than returning the available memory within a process, it should return the amount of free memory on the entire system.</p>
+<p>My implementation can be found in <a href="https://github.com/nwchandler/xv6-riscv/pull/2"  class="external-link" target="_blank" rel="noopener">this pull request</a>.</p>
+<p>After reviewing the existing code for a bit, along with the description of the xv6 kernel layout in the chapter, I found that memory appears to be managed by the <code>kmem</code> struct. <code>kmem</code> contains a lock and a linked list of free pages. So, my hypothesis was, if I could keep track of the size of this list as memory was both allocated (i.e., the free list got smaller) and freed (i.e., the free list got larger), then the amount of free memory should be</p>
+<blockquote>
+<p>(Number of free pages) × (Page size)</p></blockquote>
+<p>The exercise turned out to be a simple but satisfying way to better understand memory tracking in xv6.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The chapter provides a nice overview of some of the key considerations for OS (and xv6) organization. I did not summarize it here, but probably half the chapter is very focused on xv6 organization, which was useful in doing the exercise. I anticipate the rest of the book will go deeper into the implementation of the three core requirements listed at the outset of the chapter: multiplexing, isolation, and interaction.</p>
+<p>Chapter 3 dives into Page Tables and includes several exercises, making it more hands-on than the first two. It should be fun!</p>
+
+      </div>
+
+
+      <footer>
+        
+
+<section class="see-also">
+  
+    
+    
+    
+      <h3 id="see-also-in-xv6">
+        See also in xv6
+        <a class="heading-link" href="#see-also-in-xv6">
+          <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+          <span class="sr-only">Link to heading</span>
+        </a>
+      </h3>
+      <nav>
+        <ul>
+        
+        
+          
+        
+          
+            <li>
+              <a href="/articles/2025/01/12/xv6-chapter-1-operating-system-interfaces/">xv6 Chapter 1: Operating System Interfaces</a>
+            </li>
+          
+        
+        </ul>
+      </nav>
+    
+  
+</section>
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2025
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+        [v. e9472a5]
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

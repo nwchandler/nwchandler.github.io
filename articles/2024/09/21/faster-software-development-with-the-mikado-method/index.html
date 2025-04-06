@@ -15,10 +15,12 @@
 <meta name="author" content="Nick Chandler">
 <meta name="description" content="This article describes how my team at work uses the Mikado Method.">
 <meta name="keywords" content="blog,developer">
-<meta name="fediverse:creator" content="" />
 
-<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Faster Software Development with the Mikado Method">
-<meta name="twitter:description" content="This article describes how my team at work uses the Mikado Method.">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Faster Software Development with the Mikado Method">
+  <meta name="twitter:description" content="This article describes how my team at work uses the Mikado Method.">
 
 <meta property="og:url" content="https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/">
   <meta property="og:site_name" content="Nick Chandler">
@@ -45,7 +47,7 @@
 
   
   
-  <link rel="stylesheet" href="/css/coder.min.aa5ef26fa979d6793724ae2dbd71efa94fd16cb1c5c7db3b6651f21f9892a5fd.css" integrity="sha256-ql7yb6l51nk3JK4tvXHvqU/RbLHFx9s7ZlHyH5iSpf0=" crossorigin="anonymous" media="screen" />
+  <link rel="stylesheet" href="/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
 
 
 
@@ -192,8 +194,7 @@
 </h2>
 <p>The creators of the method, Daniel Brolund and Ola Ellnestam, describe its purpose in the preface to <a href="https://www.manning.com/books/the-mikado-method"  class="external-link" target="_blank" rel="noopener">their book</a>:</p>
 <blockquote>
-<p>The Mikado Method is our guide to morphing [software systems]. It helps us visualize, plan, and perform business-value-focused improvements over several iterations and increments of work, without ever having a broken codebase. It enhances communication, collaboration, and learning in software development teams. It also helps individuals and programming pairs stay on track while doing their day-to-day work. The framework that the method provides can help the whole team morph any system into the desired new shape.</p>
-</blockquote>
+<p>The Mikado Method is our guide to morphing [software systems]. It helps us visualize, plan, and perform business-value-focused improvements over several iterations and increments of work, without ever having a broken codebase. It enhances communication, collaboration, and learning in software development teams. It also helps individuals and programming pairs stay on track while doing their day-to-day work. The framework that the method provides can help the whole team morph any system into the desired new shape.</p></blockquote>
 <p>At its core, the Mikado Method is very straightforward. In fact, I feel like the essence of the technique is probably the kind of thing that some engineers would do intuitively and never think to give it a name. But it does have <em>just enough</em> rigor that it is easier said than done.</p>
 <h3 id="how-it-works">
   How it Works
@@ -226,8 +227,7 @@
 <p>Deleting changes you&rsquo;ve been working on can be difficult! If you really can&rsquo;t bring yourself to delete it, stash it, but I encourage you not to do this! You might feel like you&rsquo;ve made good progress, but continuing on down the rabbit hole can lead to unreviewable pull requests for your team and a lot of cognitive load for yourself.</p>
 <p>You might be worried about how you&rsquo;ll remember what you previously did. That&rsquo;s what the graph is for. You&rsquo;ll still have a record of what you needed in the little circle you drew in step 2. You can come back to it once all of its pre-requisites are complete.</p>
 <blockquote>
-<p><em>Aside:</em> Even though I&rsquo;ve used the technique for a while now, I still fall victim to thinking I&rsquo;m &ldquo;just about done&rdquo; and keep digging myself into a deeper hole every now and then. Each time I do this, I come away wishing I had just deleted my branch, made some new tasks, and stuck to the process.</p>
-</blockquote>
+<p><em>Aside:</em> Even though I&rsquo;ve used the technique for a while now, I still fall victim to thinking I&rsquo;m &ldquo;just about done&rdquo; and keep digging myself into a deeper hole every now and then. Each time I do this, I come away wishing I had just deleted my branch, made some new tasks, and stuck to the process.</p></blockquote>
 <h3 id="recursive-exploration-turtles-all-the-way-down">
   Recursive Exploration: Turtles All the Way Down
   <a class="heading-link" href="#recursive-exploration-turtles-all-the-way-down">
@@ -256,7 +256,7 @@
 <p>Deciding to give the method a shot, you write down a brief description (&ldquo;Add Word Count Mode&rdquo;) to your paper and get started. You start writing code and before long realize a couple things: 1) You have your current implementation all directly within the <code>main</code> function; and, 2) You don&rsquo;t have a way to actually tell whether a user wants lines or words. So, you draw a couple pre-requisites for these.</p>
 <p>You decide to move down a level and explore counting words when the user provides a flag, <code>-w</code>. Unfortunately, your program doesn&rsquo;t parse flags yet, and even if it did, it would be better to call a function to count words rather than putting this into <code>main</code>. Now you start on the function to count words, and you decide, &ldquo;Hey, it sure would be nice if I could get a list of the words in a string, where each element was the text in between spaces.&rdquo;</p>
 <p>Before long, you have something that looks maybe, sort-of something like the drawing below.</p>
-<p><img alt="Example Mikado Chart" src="/articles/2024/09/21/faster-software-development-with-the-mikado-method/mikado-example.png"></p>
+<p><img src="/articles/2024/09/21/faster-software-development-with-the-mikado-method/mikado-example.png" alt="Example Mikado Chart"></p>
 <p>It&rsquo;s a somewhat trivial example and probably misses some actual steps that a person would find if they were to actually need to implement such functionality. But hopefully this helps to demonstrate what a Mikado chart looks like and how it shows interdependencies.</p>
 <h2 id="how-we-use-the-mikado-method-for-project-planning">
   How We Use the Mikado Method for Project Planning
@@ -322,7 +322,6 @@
         
         
         
-
         
         
       </footer>
@@ -368,9 +367,8 @@
 
 
   
+
   
-
-
 
   
 
@@ -402,5 +400,4 @@
 
   
 </body>
-
 </html>
