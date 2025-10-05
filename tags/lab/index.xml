@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lab on Nick Chandler</title>
+    <link>https://nickchandler.dev/tags/lab/</link>
+    <description>Recent content in Lab on Nick Chandler</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 04 Oct 2025 00:36:52 -0400</lastBuildDate>
+    <atom:link href="https://nickchandler.dev/tags/lab/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Lab Report: Adding Stride Scheduling to xv6</title>
+      <link>https://nickchandler.dev/articles/2025/10/03/lab-report-adding-stride-scheduling-to-xv6/</link>
+      <pubDate>Fri, 03 Oct 2025 21:56:18 -0400</pubDate>
+      <guid>https://nickchandler.dev/articles/2025/10/03/lab-report-adding-stride-scheduling-to-xv6/</guid>
+      <description>&lt;p&gt;The xv6 kernel uses a basic round robin scheduler. To understand scheduling more deeply, I replaced it with a stride scheduler. This post compares round robin and stride scheduling, explains how I added it to xv6, and what I learned along the way.&lt;/p&gt;&#xA;&lt;h2 id=&#34;tldr--key-takeaways&#34;&gt;&#xA;  TL;DR / Key Takeaways&#xA;  &lt;a class=&#34;heading-link&#34; href=&#34;#tldr--key-takeaways&#34;&gt;&#xA;    &lt;i class=&#34;fa-solid fa-link&#34; aria-hidden=&#34;true&#34; title=&#34;Link to heading&#34;&gt;&lt;/i&gt;&#xA;    &lt;span class=&#34;sr-only&#34;&gt;Link to heading&lt;/span&gt;&#xA;  &lt;/a&gt;&#xA;&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;xv6 uses a simple round robin scheduler that treats all runnable processes equally.&lt;/li&gt;&#xA;&lt;li&gt;I replaced it with a stride scheduler to explore proportional-share scheduling.&lt;/li&gt;&#xA;&lt;li&gt;Stride scheduling assigns each process a &amp;ldquo;stride&amp;rdquo; value that determines how often it runs; smaller strides mean higher priority.&lt;/li&gt;&#xA;&lt;li&gt;In a few lines of code, I was able to achieve stride scheduling effectiveness on par with the theoretical expectations.&lt;/li&gt;&#xA;&lt;li&gt;Along the way, I uncovered an interesting startup lockup in &lt;code&gt;init&lt;/code&gt; worth looking into further.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;whats-a-scheduler-again&#34;&gt;&#xA;  What&amp;rsquo;s a Scheduler, Again?&#xA;  &lt;a class=&#34;heading-link&#34; href=&#34;#whats-a-scheduler-again&#34;&gt;&#xA;    &lt;i class=&#34;fa-solid fa-link&#34; aria-hidden=&#34;true&#34; title=&#34;Link to heading&#34;&gt;&lt;/i&gt;&#xA;    &lt;span class=&#34;sr-only&#34;&gt;Link to heading&lt;/span&gt;&#xA;  &lt;/a&gt;&#xA;&lt;/h2&gt;&#xA;&lt;p&gt;One of the most important responsibilities of an operating system is to select which processes (think: running programs) to run and when. If there were, say, one process running and one CPU on the system, then there&amp;rsquo;s no problem - just let that process run. But, on real systems, there are many processes running at a time and relatively few processors on which to run. To provide the illusion of letting every process run, the OS allows these processes to run for very short bursts of time, then allowing another one to run for a short time, and so on. Choosing which process to run is the role of the OS &lt;strong&gt;scheduler&lt;/strong&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lab Notes on Nick Chandler</title>
+    <link>http://localhost:1313/series/lab-notes/</link>
+    <description>Recent content in Lab Notes on Nick Chandler</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 03 Oct 2025 21:56:18 -0400</lastBuildDate>
+    <atom:link href="http://localhost:1313/series/lab-notes/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Lab Notes: Adding Stride Scheduling to xv6</title>
+      <link>http://localhost:1313/articles/2025/10/03/lab-notes-adding-stride-scheduling-to-xv6/</link>
+      <pubDate>Fri, 03 Oct 2025 21:56:18 -0400</pubDate>
+      <guid>http://localhost:1313/articles/2025/10/03/lab-notes-adding-stride-scheduling-to-xv6/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>
