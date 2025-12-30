@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Data Types on Nick Chandler</title>
+    <link>https://nickchandler.dev/tags/data-types/</link>
+    <description>Recent content in Data Types on Nick Chandler</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 29 Dec 2025 18:00:00 -0500</lastBuildDate>
+    <atom:link href="https://nickchandler.dev/tags/data-types/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Zig Type Coercion and the Illusion of Magic Syntax</title>
+      <link>https://nickchandler.dev/articles/2025/12/29/zig-type-coercion-and-the-illusion-of-magic-syntax/</link>
+      <pubDate>Mon, 29 Dec 2025 18:00:00 -0500</pubDate>
+      <guid>https://nickchandler.dev/articles/2025/12/29/zig-type-coercion-and-the-illusion-of-magic-syntax/</guid>
+      <description>&lt;p&gt;I have recently been exploring some systems programming languages, with a recent&#xA;focus on &lt;a href=&#34;https://ziglang.org/&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Zig&lt;/a&gt;. It seems like there&amp;rsquo;s been a lot of buzz about the language&#xA;in the past year or so, and I wanted to get some hands-on experience with it to&#xA;see what that buzz was all about. In general, I&amp;rsquo;ve quite enjoyed building a&#xA;couple of small projects on &lt;a href=&#34;https://codecrafters.io/&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Codecrafters&lt;/a&gt; using Zig. Whether I&#xA;end up using Zig on a regular basis in the future or not, it has some interesting&#xA;design choices that I think will help me be a better developer in general - not&#xA;least of which is keeping every memory allocation top-of-mind.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
