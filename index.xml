@@ -6,8 +6,15 @@
     <description>Recent content on Nick Chandler</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 29 Dec 2025 18:00:00 -0500</lastBuildDate>
+    <lastBuildDate>Sat, 10 Jan 2026 22:56:18 -0500</lastBuildDate>
     <atom:link href="https://nickchandler.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Programmatic Comptime Type Creation in Zig</title>
+      <link>https://nickchandler.dev/articles/2026/01/10/programmatic-comptime-type-creation-in-zig/</link>
+      <pubDate>Sat, 10 Jan 2026 22:56:18 -0500</pubDate>
+      <guid>https://nickchandler.dev/articles/2026/01/10/programmatic-comptime-type-creation-in-zig/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve recently been learning the Zig programming language. I&amp;rsquo;ve found it to be&#xA;a great language as I experiment with systems programming in more depth. It&#xA;doesn&amp;rsquo;t hide much from developers, &lt;a href=&#34;https://nickchandler.dev/articles/2025/12/29/zig-type-coercion-and-the-illusion-of-magic-syntax/&#34; &gt;even when it seems magical at first&lt;/a&gt;.&#xA;I appreciate this because it forces me to consider the system holistically.&lt;/p&gt;&#xA;&lt;p&gt;One of Zig&amp;rsquo;s flashiest features is &lt;a href=&#34;https://ziglang.org/documentation/0.15.2/#comptime&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;comptime&lt;/a&gt;. Comptime allows Zig&#xA;to execute regular Zig code at the time that programs are compiled. If you&amp;rsquo;re&#xA;familiar with languages like Rust, C, or C++, you are likely familiar with macros.&#xA;However, whereas macros often involve a secondary syntax, comptime Zig &lt;em&gt;is&lt;/em&gt; Zig,&#xA;meaning you can get metaprogramming capabilities in a statically compiled&#xA;language without the overhead of remembering &lt;em&gt;two&lt;/em&gt; languages.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Zig Type Coercion and the Illusion of Magic Syntax</title>
       <link>https://nickchandler.dev/articles/2025/12/29/zig-type-coercion-and-the-illusion-of-magic-syntax/</link>

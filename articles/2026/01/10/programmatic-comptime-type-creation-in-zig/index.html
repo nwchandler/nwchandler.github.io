@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Programmatic Comptime Type Creation in Zig · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="Using Zig&#39;s compile-time code execution abilities to programmatically generate zero-cost data types.">
+<meta name="keywords" content="systems software, operating systems, distributed systems, compilers, networking, systems programming, virtualization, computer systems, software craftsmanship, technical writing, experiments, lab notes">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Programmatic Comptime Type Creation in Zig">
+  <meta name="twitter:description" content="Using Zig&#39;s compile-time code execution abilities to programmatically generate zero-cost data types.">
+
+<meta property="og:url" content="https://nickchandler.dev/articles/2026/01/10/programmatic-comptime-type-creation-in-zig/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="Programmatic Comptime Type Creation in Zig">
+  <meta property="og:description" content="Using Zig&#39;s compile-time code execution abilities to programmatically generate zero-cost data types.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-10T22:56:18-05:00">
+    <meta property="article:modified_time" content="2026-01-10T22:56:18-05:00">
+    <meta property="article:tag" content="Zig">
+    <meta property="article:tag" content="Comptime">
+    <meta property="article:tag" content="Metaprogramming">
+
+
+
+
+<link rel="canonical" href="https://nickchandler.dev/articles/2026/01/10/programmatic-comptime-type-creation-in-zig/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://nickchandler.dev/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://nickchandler.dev/articles/2026/01/10/programmatic-comptime-type-creation-in-zig/">
+              Programmatic Comptime Type Creation in Zig
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-01-10T22:56:18-05:00">
+                January 10, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              17-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/zig/">Zig</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/comptime/">Comptime</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/metaprogramming/">Metaprogramming</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>I&rsquo;ve recently been learning the Zig programming language. I&rsquo;ve found it to be
+a great language as I experiment with systems programming in more depth. It
+doesn&rsquo;t hide much from developers, <a href="https://nickchandler.dev/articles/2025/12/29/zig-type-coercion-and-the-illusion-of-magic-syntax/" >even when it seems magical at first</a>.
+I appreciate this because it forces me to consider the system holistically.</p>
+<p>One of Zig&rsquo;s flashiest features is <a href="https://ziglang.org/documentation/0.15.2/#comptime"  class="external-link" target="_blank" rel="noopener">comptime</a>. Comptime allows Zig
+to execute regular Zig code at the time that programs are compiled. If you&rsquo;re
+familiar with languages like Rust, C, or C++, you are likely familiar with macros.
+However, whereas macros often involve a secondary syntax, comptime Zig <em>is</em> Zig,
+meaning you can get metaprogramming capabilities in a statically compiled
+language without the overhead of remembering <em>two</em> languages.</p>
+<p>In a compiled language, some information is known at compile-time (when the
+program is turned into an executable), while some is known at runtime (while
+the program is running inside a process). Comptime allows Zig to use the
+compile-time information to alter its compilation. This is how Zig supports
+generics, it allows the compiler to evaluate code up front rather than during
+runtime, and it even allows creating whole new data types <em>while it&rsquo;s compiling!</em></p>
+<p>To get more familiar with comptime, I recently created a <a href="https://www.github.com/nwchandler/bitfield.zig"  class="external-link" target="_blank" rel="noopener">small library for
+creating bitfields from schemas</a>. In this post, I&rsquo;ll describe
+some of the things I learned along the way, so that you might feel more comfortable
+doing something similar if and when you ever need to!</p>
+<p>This post assumes you&rsquo;ll have a basic understanding of Zig syntax and types,
+but no other experience with comptime metaprogramming is required.</p>
+<blockquote>
+<p>NOTE: Zig is still evolving, and syntax could change over time. All examples
+and links in this post target Zig 0.15.2. In particular, it looks like @Type will
+be replaced with some more ergonomic built-in functions like @Struct beginning
+in 0.16.0. I plan to keep bitfield.zig up to date with language changes, but I
+might not update this blog post, so please be aware of this!</p></blockquote>
+<h2 id="a-brief-aside-on-bitfields">
+  A Brief Aside on Bitfields
+  <a class="heading-link" href="#a-brief-aside-on-bitfields">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Because I&rsquo;ll refer to them throughout the post, it&rsquo;s worth knowing a little
+about <a href="https://en.wikipedia.org/wiki/Bit_field"  class="external-link" target="_blank" rel="noopener">bitfields</a> and why I thought a library might be useful. I
+started my career as a network engineer, where interoperability requires
+well-defined protocols, which you could think of as types in a sense. For example,
+a DNS request needs to be formatted according to standards, with certain fields
+set in order for two systems to communicate with each other.</p>
+<p>But also, protocols are designed not to waste space. A single bit can convey
+whether a feature should be &ldquo;on&rdquo; or &ldquo;off,&rdquo; for instance. To avoid wasting bytes of
+memory for bits of information, protocols commonly use bitfields - many of these
+smaller components packed together into a single, larger block. So, for instance,
+whereas the number 255 could be represented in binary as <code>11111111</code>, you could
+also consider this to be eight different little toggles, all set to 1, conveying
+totally different meanings.</p>
+<p>Although network protocols use bitfields frequently, so too do lots of other
+computer systems. You&rsquo;ll find them in binary data formats and controls for processor
+registers too. Since this is an area where Zig fits great, I thought a library
+that could generate bitfield types from schemas might be useful.</p>
+<h2 id="type-functions-functions-that-return-types">
+  Type Functions: Functions That Return Types
+  <a class="heading-link" href="#type-functions-functions-that-return-types">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>If you&rsquo;ve worked with statically typed languages in the past, the following
+code snippet probably seems intuitive even if you&rsquo;ve never worked with Zig:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">var</span> foo<span style="color:#fe8019">:</span> <span style="color:#fabd2f">u32</span> <span style="color:#fe8019">=</span> <span style="color:#d3869b">42</span>;
+</span></span></code></pre></div><p>Although the placement of the type, <code>u32</code> (an unsigned, 32-bit integer), might
+not be quite what you&rsquo;d see in other languages, it would make sense that the
+type would be defined. Otherwise, it would be unclear how much space to give
+the variable and even what operations were valid for it.</p>
+<p>Now, how about this?</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">var</span> foo<span style="color:#fe8019">:</span> <span style="color:#fabd2f">MaybeSigned</span>(<span style="color:#fe8019">false</span>) <span style="color:#fe8019">=</span> <span style="color:#d3869b">42</span>;
+</span></span></code></pre></div><p>Wait, what?</p>
+<p>In Zig, types are first-class values at compile time. You can pass them as
+function parameters, and you can derive them from functions evaluated at
+compile time. Although the type annotation above calls a poorly-named function,
+as long as <code>MaybeSigned</code> returns a type - it is a so-called &ldquo;type function&rdquo; -
+this is absolutely valid.</p>
+<p>Consider a potential definition for the function below.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">fn</span> <span style="color:#fabd2f">MaybeSigned</span>(<span style="color:#fe8019">comptime</span> is_signed<span style="color:#fe8019">:</span> <span style="color:#fabd2f">bool</span>) <span style="color:#fabd2f">type</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (is_signed) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fabd2f">i32</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fabd2f">u32</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Notice a few things here. First, the return type is literally <code>type</code>. This
+means that the function is going to return a value that can be used as a type.
+Additionally, the <code>is_signed</code> parameter is explicitly identified as a value
+that must be known at compile-time. (Technically, Zig will enforce type
+function evaluation only at compile-time, but I find the <code>comptime</code> qualifier
+to be a nice bit of extra clarification for human readers.) Finally, note that
+even though the function&rsquo;s logic is kind of bizarre, it&rsquo;s still just normal code.
+The only difference is that the compiler will evaluate this during compilation
+instead of sticking it into the executable to evaluate at runtime.</p>
+<p>Returning types isn&rsquo;t just a party trick. (What kind of parties are you going
+to where this would even <em>be</em> a trick?) It is actually quite a common pattern
+in Zig. Want a new DebugAllocator from a default configuration? Here you go:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">var</span> dba<span style="color:#fe8019">:</span> std.heap.<span style="color:#fabd2f">DebugAllocator</span>(.{}) <span style="color:#fe8019">=</span> .init;
+</span></span></code></pre></div><p>The <code>.init</code> on the right-hand side here is a declaration literal - a topic for
+another day - but note that even the <em>value</em> <code>.init</code> relies on the type
+returned by the function.</p>
+<p>Try the following based on our earlier example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// This isn&#39;t going to work!
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">var</span> foo<span style="color:#fe8019">:</span> <span style="color:#fabd2f">MaybeSigned</span>(<span style="color:#fe8019">false</span>) <span style="color:#fe8019">=</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">42</span>;
+</span></span></code></pre></div><p>Compilation will fail with this example because the function returns an unsigned
+integer type, and the compiler will kindly inform you <code>type 'u32' cannot represent integer value '-42'</code>. So, not only do we get compile-time types, but we still
+also get compile-time type safety. Not too bad, huh?</p>
+<h2 id="reflection-and-reification">
+  Reflection and Reification
+  <a class="heading-link" href="#reflection-and-reification">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Sometimes, it&rsquo;s useful to introspect data types and change program behavior
+based on what you find. This is known as <a href="https://en.wikipedia.org/wiki/Reflective_programming"  class="external-link" target="_blank" rel="noopener">reflection</a>. Reflection
+goes from type to data about the type. <a href="https://en.wikipedia.org/wiki/Reification_%28computer_science%29"  class="external-link" target="_blank" rel="noopener">Reification</a> is the
+inverse: it constructs a type from data.</p>
+<p>Let&rsquo;s see how Zig supports both.</p>
+<h3 id="reflection-with-typeinfo">
+  Reflection with @typeInfo
+  <a class="heading-link" href="#reflection-with-typeinfo">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Type information in Zig only exists at compile-time. It is removed from the
+executable and is not available using runtime reflection, like
+some languages provide. But, because of comptime, you can still use reflection
+to alter program behavior, as long as that behavior doesn&rsquo;t rely on any
+information that would only be available at runtime. For example, if behavior
+relied on a constant or a comptime variable, that would be fine; if behavior
+relied on user input while the program runs, that&rsquo;s not possible.</p>
+<p>Let&rsquo;s take a look at comptime reflection to evaluate a type, using the
+<a href="https://ziglang.org/documentation/0.15.2/#typeInfo"  class="external-link" target="_blank" rel="noopener"><code>@typeInfo</code></a> builtin. <code>@typeInfo</code> takes a type as a parameter and
+returns a <a href="https://ziglang.org/documentation/0.15.2/std/#std.builtin.Type"  class="external-link" target="_blank" rel="noopener"><code>std.builtin.Type</code></a>. This is essentially a mapping
+from a type to data about the type. The definition of <code>std.builtin.Type</code> looks
+like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// std.builtin.Type (partial)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">pub</span> <span style="color:#fe8019">const</span> Type <span style="color:#fe8019">=</span> <span style="color:#fe8019">union</span>(<span style="color:#fe8019">enum</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">type</span><span style="color:#fe8019">:</span> <span style="color:#fabd2f">void</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">void</span><span style="color:#fe8019">:</span> <span style="color:#fabd2f">void</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bool</span><span style="color:#fe8019">:</span> <span style="color:#fabd2f">void</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">noreturn</span><span style="color:#fe8019">:</span> <span style="color:#fabd2f">void</span>,
+</span></span><span style="display:flex;"><span>  int<span style="color:#fe8019">:</span> Int,
+</span></span><span style="display:flex;"><span>  float<span style="color:#fe8019">:</span> Float,
+</span></span><span style="display:flex;"><span>  pointer<span style="color:#fe8019">:</span> Pointer,
+</span></span><span style="display:flex;"><span>  array<span style="color:#fe8019">:</span> Array,
+</span></span><span style="display:flex;"><span>  @<span style="color:#b8bb26">&#34;struct&#34;</span><span style="color:#fe8019">:</span> Struct,
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// several more members below
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};
+</span></span></code></pre></div><p>It&rsquo;s a tagged union, where each tag correlates to one of the builtin data types
+in the language. Some of these instances have payloads, which further describe
+the type. Zooming in on <code>Int</code>, we see this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// std.builtin.Type.Int
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">pub</span> <span style="color:#fe8019">const</span> Int <span style="color:#fe8019">=</span> <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    signedness<span style="color:#fe8019">:</span> Signedness,
+</span></span><span style="display:flex;"><span>    bits<span style="color:#fe8019">:</span> <span style="color:#fabd2f">u16</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>So, if the tag of <code>Type</code> is <code>&quot;int&quot;</code>, it will also contain a payload with an
+indication of signedness (signed or unsigned) and the bit width. (Not really
+the point here, but <code>bits</code> being of type <code>u16</code> means that, yes, integers in
+Zig can be 65,535 bits wide!)</p>
+<p>You can use <code>@typeInfo</code> to go from a type to a struct that allows you to inspect
+it, then. Consider the following function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">fn</span> <span style="color:#fabd2f">printInfo</span>(T<span style="color:#fe8019">:</span> <span style="color:#fabd2f">type</span>) <span style="color:#fabd2f">void</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> info <span style="color:#fe8019">=</span> <span style="color:#fabd2f">@typeInfo</span>(T);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">switch</span> (info) {
+</span></span><span style="display:flex;"><span>      .int <span style="color:#fe8019">=&gt;</span> <span style="color:#fe8019">|</span>i<span style="color:#fe8019">|</span> {
+</span></span><span style="display:flex;"><span>          std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>              <span style="color:#b8bb26">&#34;(un)signed: {s}, bits: {d}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>              .{
+</span></span><span style="display:flex;"><span>                  <span style="color:#fabd2f">@tagName</span>(i.signedness),
+</span></span><span style="display:flex;"><span>                  i.bits,
+</span></span><span style="display:flex;"><span>              },
+</span></span><span style="display:flex;"><span>          );
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">else</span> <span style="color:#fe8019">=&gt;</span> <span style="color:#fe8019">|</span>t<span style="color:#fe8019">|</span> {
+</span></span><span style="display:flex;"><span>          <span style="color:#fabd2f">@compileError</span>(<span style="color:#b8bb26">&#34;not an expected type: &#34;</span> <span style="color:#fe8019">++</span> <span style="color:#fabd2f">@tagName</span>(t));
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This function uses <code>@typeInfo</code> to get type information and then alters its
+behavior based on what it finds. Specifically, if it is an <code>.int</code> instance, it
+prints the signedness and bit width. Note that because it runs at comptime,
+though, if this function is ever called by a non-int type, compilation will
+fail with a note to tell what type it was actually given. This is comptime
+reflection. If you call it with the following, here&rsquo;s what happens:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">const</span> foo<span style="color:#fe8019">:</span> <span style="color:#fabd2f">MaybeSigned</span>(<span style="color:#fe8019">false</span>) <span style="color:#fe8019">=</span> <span style="color:#d3869b">42</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">printInfo</span>(<span style="color:#fabd2f">@TypeOf</span>(foo));
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// prints &#34;(un)signed: unsigned, bits: 32&#34; at runtime
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> bar <span style="color:#fe8019">=</span> <span style="color:#fe8019">true</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">printInfo</span>(<span style="color:#fabd2f">@TypeOf</span>(bar));
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// compilation fails with: &#34;not an expected type: bool&#34;
+</span></span></span></code></pre></div><h3 id="reification-with-type">
+  Reification with @Type
+  <a class="heading-link" href="#reification-with-type">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<blockquote>
+<p>As mentioned earlier, @Type will be replaced with more ergonomic alternatives
+in 0.16.0.</p></blockquote>
+<p>Whereas <code>@typeInfo</code> gives you a <code>std.builtin.Type</code> from a type, <a href="https://ziglang.org/documentation/0.15.2/#Type"  class="external-link" target="_blank" rel="noopener"><code>@Type</code></a>
+gives you a type from a <code>std.builtin.Type</code>. Using a little
+<a href="https://nickchandler.dev/articles/2025/12/29/zig-type-coercion-and-the-illusion-of-magic-syntax/" >type coercion</a>, this allows the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fabd2f">printInfo</span>(<span style="color:#fabd2f">@Type</span>(
+</span></span><span style="display:flex;"><span>    std.builtin.Type{
+</span></span><span style="display:flex;"><span>        .int <span style="color:#fe8019">=</span> .{
+</span></span><span style="display:flex;"><span>            .bits <span style="color:#fe8019">=</span> <span style="color:#d3869b">16</span>,
+</span></span><span style="display:flex;"><span>            .signedness <span style="color:#fe8019">=</span> .signed,
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>));
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// prints &#34;(un)signed: signed, bits: 16&#34; at runtime
+</span></span></span></code></pre></div><p>And, this same thing can be done in type functions as well. Let&rsquo;s make a
+convenience function for producing arbitrarily-sized unsigned integers, for
+instance:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">fn</span> <span style="color:#fabd2f">UInt</span>(<span style="color:#fe8019">comptime</span> bits<span style="color:#fe8019">:</span> <span style="color:#fabd2f">u16</span>) <span style="color:#fabd2f">type</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fabd2f">@Type</span>(.{
+</span></span><span style="display:flex;"><span>      .int <span style="color:#fe8019">=</span> .{
+</span></span><span style="display:flex;"><span>          .bits <span style="color:#fe8019">=</span> bits,
+</span></span><span style="display:flex;"><span>          .signedness <span style="color:#fe8019">=</span> .unsigned,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now, we can do the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">const</span> bar<span style="color:#fe8019">:</span> <span style="color:#fabd2f">UInt</span>(<span style="color:#d3869b">4</span>) <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">printInfo</span>(<span style="color:#fabd2f">@TypeOf</span>(bar));
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// prints &#34;(un)signed: unsigned, bits: 4&#34; at runtime
+</span></span></span></code></pre></div><p>You could make a similar function that also took a signedness parameter and
+produce any integer type based on a type function. In fact, this is precisely
+what the upcoming 0.16.0 ergonomic <code>@Type</code> alternatives (like <code>@Int</code>) will do!</p>
+<p>The key insight here is that if you can describe a type as data, you can
+construct that type. And, this isn&rsquo;t limited to &ldquo;simple&rdquo; types like numbers -
+you can do the same thing with compound types like structs.</p>
+<h2 id="building-a-struct-at-comptime">
+  Building a Struct at Comptime
+  <a class="heading-link" href="#building-a-struct-at-comptime">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>So, let&rsquo;s see what this looks like. In the DNS header, there&rsquo;s a run of four
+bits that we&rsquo;ll use as an example. They are the AA (Authoritative Answer), TC
+(TrunCation), RD (Recursion Desired), and RA (Recursion Available) bits. The
+meaning of these bits is not important to the discussion - just know that each
+one signals whether something is &ldquo;true&rdquo; or &ldquo;false&rdquo; essentially.</p>
+<p>Here&rsquo;s how we could define this in Zig. Note that this is a packed struct,
+rather than a standard (or auto) struct. Packed structs have the property that
+the layout is well-defined (Zig reserves the right to order fields in standard
+structs however the compiler sees fit), and there is no extra padding between
+fields (an extension of the previous property).</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">const</span> simple_dns_bitfield <span style="color:#fe8019">=</span> <span style="color:#fe8019">packed</span> <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    aa<span style="color:#fe8019">:</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>    tc<span style="color:#fe8019">:</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>    rd<span style="color:#fe8019">:</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>    ra<span style="color:#fe8019">:</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> message<span style="color:#fe8019">:</span> simple_dns_bitfield <span style="color:#fe8019">=</span> .{
+</span></span><span style="display:flex;"><span>    .aa <span style="color:#fe8019">=</span> <span style="color:#fe8019">true</span>,
+</span></span><span style="display:flex;"><span>    .tc <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>    .rd <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>    .ra <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#b8bb26">&#34;message representation: {b:04}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>    .{
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">@as</span>(
+</span></span><span style="display:flex;"><span>            u4,
+</span></span><span style="display:flex;"><span>            <span style="color:#fabd2f">@bitCast</span>(message),
+</span></span><span style="display:flex;"><span>        ),
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><blockquote>
+<p>If you run the code above, you might expect that the printed representation
+would be <code>1000</code> because the first bit is true, while the others are false. One
+quirk of packed structs is that they actually map the first field to the least
+significant bits. So, what you&rsquo;ll actually see printed is: <code>&quot;message representation: 0001&quot;</code>. This may just be how my brain works, but this is easy
+to get wrong.</p></blockquote>
+<p>This works fine for a small struct, but imagine doing this for dozens of
+different protocol formats. Let&rsquo;s see how we can generate this struct instead.</p>
+<p>As we know from the <a href="#reification-with-type" >previous section</a>, if we can
+construct a <code>std.builtin.Type</code>, then we can construct an actual type. For structs,
+the enum variant to look at is <code>@&quot;struct&quot;</code>. (This syntax looks a little weird,
+but the enclosing <code>@&quot;&quot;</code> just allows you to re-use reserved language keywords as
+identifiers.) The type of this variant is <code>std.builtin.Type.Struct</code>. It and some
+of its useful subfield types are below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Member of std.builtin.Type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">pub</span> <span style="color:#fe8019">const</span> Struct <span style="color:#fe8019">=</span> <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    layout<span style="color:#fe8019">:</span> ContainerLayout,
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/// Only valid if layout is .@&#34;packed&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    backing_integer<span style="color:#fe8019">:</span> <span style="color:#fe8019">?</span><span style="color:#fabd2f">type</span> <span style="color:#fe8019">=</span> <span style="color:#fe8019">null</span>,
+</span></span><span style="display:flex;"><span>    fields<span style="color:#fe8019">:</span> []<span style="color:#fe8019">const</span> StructField,
+</span></span><span style="display:flex;"><span>    decls<span style="color:#fe8019">:</span> []<span style="color:#fe8019">const</span> Declaration,
+</span></span><span style="display:flex;"><span>    is_tuple<span style="color:#fe8019">:</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Member of std.builtin.Type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">pub</span> <span style="color:#fe8019">const</span> ContainerLayout <span style="color:#fe8019">=</span> <span style="color:#fe8019">enum</span>(u2) {
+</span></span><span style="display:flex;"><span>    auto,
+</span></span><span style="display:flex;"><span>    @<span style="color:#b8bb26">&#34;extern&#34;</span>,
+</span></span><span style="display:flex;"><span>    @<span style="color:#b8bb26">&#34;packed&#34;</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Member of std.builtin.Type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">pub</span> <span style="color:#fe8019">const</span> StructField <span style="color:#fe8019">=</span> <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    name<span style="color:#fe8019">:</span> [<span style="color:#fe8019">:</span><span style="color:#d3869b">0</span>]<span style="color:#fe8019">const</span> <span style="color:#fabd2f">u8</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">type</span><span style="color:#fe8019">:</span> <span style="color:#fabd2f">type</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/// The type of the default value is the type of this struct field, which
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">/// is the value of the `type` field in this struct. However there is no
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">/// way to refer to that type here, so we use `*const anyopaque`.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    default_value_ptr<span style="color:#fe8019">:</span> <span style="color:#fe8019">?*</span><span style="color:#fe8019">const</span> anyopaque,
+</span></span><span style="display:flex;"><span>    is_comptime<span style="color:#fe8019">:</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>    alignment<span style="color:#fe8019">:</span> <span style="color:#fabd2f">comptime_int</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>Let&rsquo;s use this newfound knowledge to reflect on our simple bitfield from above,
+adding a new switch prong in <code>printInfo</code> to print useful information about
+structs.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// The same printInfo from above, now with some new code in the middle
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">fn</span> <span style="color:#fabd2f">printInfo</span>(T<span style="color:#fe8019">:</span> <span style="color:#fabd2f">type</span>) <span style="color:#fabd2f">void</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> info <span style="color:#fe8019">=</span> <span style="color:#fabd2f">@typeInfo</span>(T);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">switch</span> (info) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// same int case as earlier above here...
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>    .@<span style="color:#b8bb26">&#34;struct&#34;</span> <span style="color:#fe8019">=&gt;</span> <span style="color:#fe8019">|</span>s<span style="color:#fe8019">|</span> {
+</span></span><span style="display:flex;"><span>        std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#b8bb26">&#34;layout: {s}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>            .{
+</span></span><span style="display:flex;"><span>                <span style="color:#fabd2f">@tagName</span>(s.layout),
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// inline forces this loop to run at comptime, which
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">// is required because type information is not known
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">// at runtime
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fe8019">inline</span> <span style="color:#fe8019">for</span> (s.fields) <span style="color:#fe8019">|</span>field<span style="color:#fe8019">|</span> {
+</span></span><span style="display:flex;"><span>            std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#b8bb26">&#34;field name:     {s}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>                .{field.name},
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#b8bb26">&#34;field type:     {s}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>                .{<span style="color:#fabd2f">@typeName</span>(field.<span style="color:#fabd2f">type</span>)},
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#b8bb26">&#34;field align:    {d}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>                .{field.alignment},
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#b8bb26">&#34;comptime only:  {}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>                .{field.is_comptime},
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#b8bb26">&#34;default ptr:    {?}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>                .{field.default_value_ptr},
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            std.debug.<span style="color:#fabd2f">print</span>(<span style="color:#b8bb26">&#34;</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, .{});
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// same else case as earlier below here...
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p>There is a comment in the snippet above, but just to reiterate: An <code>inline</code>
+loop is evaluated at compile time, whereas a standard loop is evaluated at
+runtime. At the risk of belaboring the point, type information is not available
+at runtime in Zig, so if you want to evaluate a loop using type information,
+you need it to be <code>inline</code>.</p></blockquote>
+<p>Now, let&rsquo;s use it to inspect our manually constructed struct type.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fabd2f">printInfo</span>(simple_dns_bitfield);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// prints the following:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  layout: packed
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     aa
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     tc
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     rd
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     ra
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span></code></pre></div><p>Some of the information printed might not seem useful at first. However, we
+have to provide values for every field of the <code>StructField</code> type, so by printing
+the values, we can see a little more about what is done using normal struct
+definition syntax.</p>
+<p>Let&rsquo;s see if we can recreate the <code>simple_dns_bitfield</code> type - or, at least,
+a type that is identical to it - using reification, based on what we&rsquo;ve
+explored in the <code>std.builtin.Type.Struct</code> type.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">const</span> another_simple_dns_bitfield <span style="color:#fe8019">=</span> <span style="color:#fabd2f">@Type</span>(
+</span></span><span style="display:flex;"><span>    .{
+</span></span><span style="display:flex;"><span>        .@<span style="color:#b8bb26">&#34;struct&#34;</span> <span style="color:#fe8019">=</span> .{
+</span></span><span style="display:flex;"><span>            .layout <span style="color:#fe8019">=</span> .@<span style="color:#b8bb26">&#34;packed&#34;</span>,
+</span></span><span style="display:flex;"><span>            .fields <span style="color:#fe8019">=</span> <span style="color:#fe8019">&amp;</span>.{
+</span></span><span style="display:flex;"><span>                .{
+</span></span><span style="display:flex;"><span>                    .name <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;aa&#34;</span>,
+</span></span><span style="display:flex;"><span>                    .<span style="color:#fabd2f">type</span> <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>                    .alignment <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>,
+</span></span><span style="display:flex;"><span>                    .is_comptime <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>                    .default_value_ptr <span style="color:#fe8019">=</span> <span style="color:#fe8019">null</span>,
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                .{
+</span></span><span style="display:flex;"><span>                    .name <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;tc&#34;</span>,
+</span></span><span style="display:flex;"><span>                    .<span style="color:#fabd2f">type</span> <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>                    .alignment <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>,
+</span></span><span style="display:flex;"><span>                    .is_comptime <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>                    .default_value_ptr <span style="color:#fe8019">=</span> <span style="color:#fe8019">null</span>,
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                .{
+</span></span><span style="display:flex;"><span>                    .name <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;rd&#34;</span>,
+</span></span><span style="display:flex;"><span>                    .<span style="color:#fabd2f">type</span> <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>                    .alignment <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>,
+</span></span><span style="display:flex;"><span>                    .is_comptime <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>                    .default_value_ptr <span style="color:#fe8019">=</span> <span style="color:#fe8019">null</span>,
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                .{
+</span></span><span style="display:flex;"><span>                    .name <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;ra&#34;</span>,
+</span></span><span style="display:flex;"><span>                    .<span style="color:#fabd2f">type</span> <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>                    .alignment <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>,
+</span></span><span style="display:flex;"><span>                    .is_comptime <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>                    .default_value_ptr <span style="color:#fe8019">=</span> <span style="color:#fe8019">null</span>,
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            .is_tuple <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>            .decls <span style="color:#fe8019">=</span> <span style="color:#fe8019">&amp;</span>.{},
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">printInfo</span>(another_simple_dns_bitfield);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// prints the following:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  layout: packed
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     aa
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     tc
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     rd
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     ra
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span></code></pre></div><blockquote>
+<p>I glossed over some of the required parameters, such as is_tuple and decls.
+The first simply indicates whether the struct is a tuple (values accessed by
+index rather than named fields). The second is a little more interesting: it
+refers to the set of associated functions and methods of the struct. This is
+actually one thing that the language explicitly will not allow you to create at
+comptime using reification, however. <a href="https://github.com/ziglang/zig/issues/6709#issuecomment-2227625166"  class="external-link" target="_blank" rel="noopener">Andrew Kelley has said</a>
+this was an intentional decision in the language. I won&rsquo;t be covering this in this
+post, but there are probably ways to accomplish the goal of returning types with
+behaviors for whatever your use case - it might just be that the way to do it
+isn&rsquo;t exactly what you first think of.</p></blockquote>
+<p>So, now we&rsquo;ve created a new struct type, similar to the one we defined using
+the typical <code>struct</code> type definition syntax, but we&rsquo;ve done it from an abstract
+description of the struct! But, wow, wasn&rsquo;t that a lot of typing?! Well,
+yes, it was. But, remember how we created a <code>UInt</code> function earlier that took
+a parameter and then produced a consistent type using only the parameter to
+differentiate? We can do the same thing here!</p>
+<h2 id="a-simple-bitfield-function">
+  A Simple Bitfield Function
+  <a class="heading-link" href="#a-simple-bitfield-function">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s get back to the essence of a bitfield. For our purposes here, we&rsquo;re only
+going to concern ourselves with on/off flags, just like we looked at in the
+DNS example above. I contend that the primary requirements will be: 1) each
+flag is accessible by a name; and, 2) the bitfield can be represented as a
+collection, numerically (i.e., castable to an unsigned integer).</p>
+<blockquote>
+<p>This is, admittedly, an oversimplification, but I think it&rsquo;s a useful set of
+requirements for the current discussion. And, if you&rsquo;d like to see a more
+thorough implementation, be sure to check out <a href="https://www.github.com/nwchandler/bitfield.zig"  class="external-link" target="_blank" rel="noopener">bitfield.zig</a>.</p></blockquote>
+<p>To produce a bitfield with these properties, what if we had a function that
+took a slice of field names and gave us back a packed struct? Remember, too,
+that the order Zig puts packed struct fields is the opposite of how most
+protocols are defined (Zig puts the first field at the least-significant bit,
+whereas protocols start from the most-significant bit). Let&rsquo;s write a function
+like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/// A type function that produces a bitfield, comprised of a
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/// set of flags.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">fn</span> <span style="color:#fabd2f">BitField</span>(<span style="color:#fe8019">comptime</span> flags<span style="color:#fe8019">:</span> []<span style="color:#fe8019">const</span> [<span style="color:#fe8019">:</span><span style="color:#d3869b">0</span>]<span style="color:#fe8019">const</span> <span style="color:#fabd2f">u8</span>) <span style="color:#fabd2f">type</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> (flags.len <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">@compileError</span>(<span style="color:#b8bb26">&#34;cannot produce a bitfield with zero flags&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> struct_fields<span style="color:#fe8019">:</span> [flags.len]std.builtin.Type.StructField <span style="color:#fe8019">=</span> <span style="color:#fe8019">undefined</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Reverse the fields so that they get into the right order for Zig packed
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">// structs.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fe8019">inline</span> <span style="color:#fe8019">for</span> (<span style="color:#d3869b">0</span>..flags.len) <span style="color:#fe8019">|</span>i<span style="color:#fe8019">|</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">const</span> flag <span style="color:#fe8019">=</span> flags[i];
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">const</span> order <span style="color:#fe8019">=</span> flags.len <span style="color:#fe8019">-</span> i <span style="color:#fe8019">-</span> <span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>        struct_fields[order] <span style="color:#fe8019">=</span> .{
+</span></span><span style="display:flex;"><span>            .name <span style="color:#fe8019">=</span> flag,
+</span></span><span style="display:flex;"><span>            .<span style="color:#fabd2f">type</span> <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>            .is_comptime <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>            .alignment <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>,
+</span></span><span style="display:flex;"><span>            .default_value_ptr <span style="color:#fe8019">=</span> <span style="color:#fe8019">null</span>,
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fabd2f">@Type</span>(
+</span></span><span style="display:flex;"><span>        .{
+</span></span><span style="display:flex;"><span>            .@<span style="color:#b8bb26">&#34;struct&#34;</span> <span style="color:#fe8019">=</span> .{
+</span></span><span style="display:flex;"><span>                .layout <span style="color:#fe8019">=</span> .@<span style="color:#b8bb26">&#34;packed&#34;</span>,
+</span></span><span style="display:flex;"><span>                .fields <span style="color:#fe8019">=</span> <span style="color:#fe8019">&amp;</span>struct_fields,
+</span></span><span style="display:flex;"><span>                .is_tuple <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>                .decls <span style="color:#fe8019">=</span> <span style="color:#fe8019">&amp;</span>.{},
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Note that we have compile time parameter checking - if no flags are provided,
+then the bitfield is useless, so this is a compilation error. We also use an
+inline for loop (remember: required if you want to loop at comptime!) to create
+each StructField and to put them into the right order, which is the opposite
+order that Zig uses by default.</p>
+<p>With this, we now have the infrastructure in place to produce any flag-based
+bitfield much more simply. Let&rsquo;s see how this comes together in our DNS example.</p>
+<h2 id="putting-it-together-creating-a-dns-bitfield">
+  Putting it Together: Creating a DNS Bitfield
+  <a class="heading-link" href="#putting-it-together-creating-a-dns-bitfield">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s create a DNS bitfield using our new type function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">const</span> dynamic_dns_bitfield <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BitField</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">&amp;</span>.{
+</span></span><span style="display:flex;"><span>        <span style="color:#b8bb26">&#34;aa&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b8bb26">&#34;tc&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b8bb26">&#34;rd&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b8bb26">&#34;ra&#34;</span>,
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">printInfo</span>(dynamic_dns_bitfield);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// prints the following:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  layout: packed
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     ra
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     rd
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     tc
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field name:     aa
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field type:     bool
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  field align:    0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  comptime only:  false
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  default ptr:    null
+</span></span></span></code></pre></div><p>That&rsquo;s not too difficult to create now! And, note that it <em>mostly</em> produces
+the same type as before, but now we&rsquo;ve even flipped the bits around so that
+they are in the right order. Let&rsquo;s create a message and verify this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#fe8019">const</span> dynamic_message<span style="color:#fe8019">:</span> dynamic_dns_bitfield <span style="color:#fe8019">=</span> .{
+</span></span><span style="display:flex;"><span>    .aa <span style="color:#fe8019">=</span> <span style="color:#fe8019">true</span>,
+</span></span><span style="display:flex;"><span>    .tc <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>    .rd <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>    .ra <span style="color:#fe8019">=</span> <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>std.debug.<span style="color:#fabd2f">print</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#b8bb26">&#34;dynamic representation: {b:04}</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>    .{<span style="color:#fabd2f">@as</span>(u4, <span style="color:#fabd2f">@bitCast</span>(dynamic_message))},
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// prints the following:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// dynamic representation: 1000
+</span></span></span></code></pre></div><p>Nice!</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In this post, we&rsquo;ve explored one corner of Zig&rsquo;s comptime capabilities, focusing
+on comptime reflection and type reification. Using comptime, we can
+programmatically generate new data types that follow common patterns while a
+program is being compiled. This allows for flexible data type creation, and
+these new types are baked right into the executable - they&rsquo;re zero-cost at
+runtime!</p>
+<p>I learned a lot while working on <a href="https://www.github.com/nwchandler/bitfield.zig"  class="external-link" target="_blank" rel="noopener">bitfield.zig</a>. I encourage
+you to look at that repo for more detailed and flexible bitfield construction.
+But at the very least, I hope you now have a better understanding of programmatic
+comptime type creation in Zig!</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2026
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>
