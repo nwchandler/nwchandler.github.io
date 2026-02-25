@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Filesystem on Nick Chandler</title>
+    <link>https://nickchandler.dev/tags/filesystem/</link>
+    <description>Recent content in Filesystem on Nick Chandler</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 20 Feb 2026 19:00:00 -0500</lastBuildDate>
+    <atom:link href="https://nickchandler.dev/tags/filesystem/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Anatomy of a Filesystem: xv6</title>
+      <link>https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/</link>
+      <pubDate>Fri, 20 Feb 2026 19:00:00 -0500</pubDate>
+      <guid>https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/</guid>
+      <description>&lt;p&gt;A long time ago (in IT years), I started my professional career as a network engineer. I spent the&#xA;next ~10 years troubleshooting, designing, and implementing networks for lots and lots of companies&#xA;before I began to transition into DevOps and then software engineering.&lt;/p&gt;&#xA;&lt;p&gt;I was really drawn to networking early on because it just &amp;ldquo;clicked&amp;rdquo; with me, for one reason or&#xA;another. One of the things that helped me early on is that network protocol definitions (RFCs,&#xA;usually) have a long history of including diagrams of protocol data structures. It helped me to&#xA;&lt;em&gt;see&lt;/em&gt; which bits or bytes of a header were where and how they related to each other. And, when&#xA;something wasn&amp;rsquo;t working quite right, I could fire up Wireshark (Ethereal at that time) and&#xA;visualize how the machines were talking (or not talking, depending on the situation). Seeing the&#xA;same packet structures from &lt;em&gt;real&lt;/em&gt; data that I saw in RFCs and textbooks felt like the best - and&#xA;the nerdiest - type of magic.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

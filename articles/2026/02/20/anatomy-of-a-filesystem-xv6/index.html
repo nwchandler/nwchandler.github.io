@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Anatomy of a Filesystem: xv6 · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="This post explores the layout of key structures in the xv6 filesystem. Diagrams and sample output from a CLI tool provide references.">
+<meta name="keywords" content="systems software, operating systems, distributed systems, compilers, networking, systems programming, virtualization, computer systems, software craftsmanship, technical writing, experiments, lab notes">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Anatomy of a Filesystem: xv6">
+  <meta name="twitter:description" content="This post explores the layout of key structures in the xv6 filesystem. Diagrams and sample output from a CLI tool provide references.">
+
+<meta property="og:url" content="https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="Anatomy of a Filesystem: xv6">
+  <meta property="og:description" content="This post explores the layout of key structures in the xv6 filesystem. Diagrams and sample output from a CLI tool provide references.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-20T19:00:00-05:00">
+    <meta property="article:modified_time" content="2026-02-20T19:00:00-05:00">
+    <meta property="article:tag" content="Filesystem">
+    <meta property="article:tag" content="Xv6">
+    <meta property="article:tag" content="Zig">
+
+
+
+
+<link rel="canonical" href="https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://nickchandler.dev/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/">
+              Anatomy of a Filesystem: xv6
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-02-20T19:00:00-05:00">
+                February 20, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              30-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/filesystem/">Filesystem</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/xv6/">Xv6</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/zig/">Zig</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>A long time ago (in IT years), I started my professional career as a network engineer. I spent the
+next ~10 years troubleshooting, designing, and implementing networks for lots and lots of companies
+before I began to transition into DevOps and then software engineering.</p>
+<p>I was really drawn to networking early on because it just &ldquo;clicked&rdquo; with me, for one reason or
+another. One of the things that helped me early on is that network protocol definitions (RFCs,
+usually) have a long history of including diagrams of protocol data structures. It helped me to
+<em>see</em> which bits or bytes of a header were where and how they related to each other. And, when
+something wasn&rsquo;t working quite right, I could fire up Wireshark (Ethereal at that time) and
+visualize how the machines were talking (or not talking, depending on the situation). Seeing the
+same packet structures from <em>real</em> data that I saw in RFCs and textbooks felt like the best - and
+the nerdiest - type of magic.</p>
+<p>Although this has a long tradition in networking, other systems also require structure, and
+visualizing that structure can be just as powerful when learning about them. Which brings me to
+this post, <em>Anatomy of a Filesystem: xv6</em>. The idea behind &ldquo;anatomy&rdquo; here is to focus on the
+structure of a filesystem. What is its overall structure? What are the critical sub-structures?
+How are these structures represented? In this post, we&rsquo;ll look at the filesystem of a small
+operating system to see what some of the critical structures actually look like.</p>
+<p>To support this article, I&rsquo;ve also created a small CLI utility for inspecting real xv6 filesystem
+images. I call it <code>xv6fs</code>, and you can <a href="https://www.github.com/nwchandler/xv6fs"  class="external-link" target="_blank" rel="noopener">find it on GitHub</a>. In addition, in that repo,
+you&rsquo;ll be able to find a sample image file so that you can follow along if you&rsquo;d like!</p>
+<blockquote>
+<p>Note: Please look for the v0.1.0 release for xv6fs binaries and the sample image (fs.img).
+I have tried to build for common combinations of OS and CPU architecture. If you can&rsquo;t find one
+for your system, you may need to build from source using Zig 0.15.2. The sample image should work
+for any OS you&rsquo;re running, though.</p></blockquote>
+<h2 id="brief-overview-of-filesystems">
+  Brief Overview of Filesystems
+  <a class="heading-link" href="#brief-overview-of-filesystems">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>A filesystem is one of the core concepts in an operating system. It is the interface between what
+you and I call &ldquo;files&rdquo; or &ldquo;directories&rdquo; and specific blocks of bytes on a disk. There are
+many different filesystems supported by most modern operating systems, offering different
+performance and availability characteristics. But, ultimately, they exist to keep track of where
+data is persisted and to provide users with access to that data when they need it.</p>
+<h2 id="why-xv6">
+  Why xv6?
+  <a class="heading-link" href="#why-xv6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I&rsquo;ve decided to focus on the filesystem that is built into the <a href="https://www.github.com/mit-pdos/xv6-riscv"  class="external-link" target="_blank" rel="noopener">xv6</a> operating system. xv6 is a
+teaching operating system developed at MIT and used by many people to learn OS concepts. It is
+based on early UNIX systems, and it contains the core features of an OS, but without the complexity
+of modern systems.</p>
+<p>Like its other components, the xv6 filesystem is cut down to the most important essentials that
+aspiring systems programmers should know. The filesystems you&rsquo;ll find in the &ldquo;real world&rdquo; have
+benefitted from decades of learning and optimizations for real workloads. This adds complexity,
+which is critical for actual usage, but not so critical for seeing the most important bits of a
+filesystem.</p>
+<p>The typical workflow for students is to hack on the OS internals and then boot it up in
+<a href="https://www.qemu.org/"  class="external-link" target="_blank" rel="noopener">QEMU</a>, using <code>make qemu</code>. As part of the Makefile, the build will construct a filesystem
+image, named <code>fs.img</code>, if one is not already present. This file contains the contents of what we&rsquo;ll
+look more closely at throughout the rest of the post.</p>
+<blockquote>
+<p>Note: Throughout this post, when I show <code>xv6fs</code> commands that refer to filesystem image files, I
+will call them &ldquo;fs.img&rdquo; for simplicity. You&rsquo;ll need to provide the path to your image files, though.</p></blockquote>
+<h2 id="the-50000-foot-view">
+  The 50,000 Foot View
+  <a class="heading-link" href="#the-50000-foot-view">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s start by getting a big-picture look at what&rsquo;s actually <em>in</em> an xv6 filesystem. If we run
+<code>./xv6fs info fs.img</code>, we&rsquo;ll see something like this:</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/xv6fs-info.png" alt="Screenshot of xv6fs info command showing filesystem layout: 2000 total blocks with boot block, superblock, 30 log blocks starting at block 2, 13 inode blocks starting at block 32, 1 bitmap block at block 45, and data blocks from block 46 onward"></p>
+<p>The pseudo diagram shows what each block of the filesystem is used for. But, what is a block?
+A block is the smallest chunk of storage space that the filesystem will allocate for any purpose.</p>
+<p>The xv6 filesystem&rsquo;s block size is 1024 bytes. So, every character shown in the diagram indicates
+the purpose of that particular chunk of 1024 bytes. And, the layout summary for this filesystem
+image shows that there are 2000 such blocks. Of those 2000 blocks, 46 are used by the filesystem
+in order for it to operate, and we&rsquo;ll be going into detail on those blocks. All of the &ldquo;D&rdquo; and &ldquo;.&rdquo;
+blocks are either in use by files in the filesystem or available to be allocated to such files,
+respectively.</p>
+<h2 id="superblock-the-table-of-contents">
+  Superblock: The Table of Contents
+  <a class="heading-link" href="#superblock-the-table-of-contents">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>At block number 1 (not to be confused with <a href="#boot-block-whats-before-the-superblock" >block number 0</a>) is the superblock. The
+superblock contains enough information for xv6 to find any of the key data structures of the
+filesystem.</p>
+<p>In the xv6 source code (file <a href="https://github.com/mit-pdos/xv6-riscv/blob/7d7adbb1b0acbd67c9766a20d0f9900fef2789fa/kernel/fs.h#L14-L25"  class="external-link" target="_blank" rel="noopener">kernel/fs.h</a>) the superblock is defined as below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> superblock {
+</span></span><span style="display:flex;"><span>  uint magic;        <span style="color:#928374;font-style:italic">// Must be FSMAGIC
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint size;         <span style="color:#928374;font-style:italic">// Size of file system image (blocks)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint nblocks;      <span style="color:#928374;font-style:italic">// Number of data blocks
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint ninodes;      <span style="color:#928374;font-style:italic">// Number of inodes.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint nlog;         <span style="color:#928374;font-style:italic">// Number of log blocks
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint logstart;     <span style="color:#928374;font-style:italic">// Block number of first log block
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint inodestart;   <span style="color:#928374;font-style:italic">// Block number of first inode block
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint bmapstart;    <span style="color:#928374;font-style:italic">// Block number of first free map block
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8ec07c">#define FSMAGIC 0x10203040
+</span></span></span></code></pre></div><p>This is really all that&rsquo;s needed for the OS to validate the filesystem and to locate every
+important filesystem structure. We will talk about most of these fields, but one that is worth
+mentioning here is <code>magic</code>, or the &ldquo;magic number.&rdquo; It&rsquo;s common for binary files to include such
+a magic number, a static value that helps programs reading the file to identify its type. They
+are chosen arbitrarily, and xv6 has chosen the 32-bit number <code>0x10203040</code>.  If the first 32 bits
+of the superblock don&rsquo;t match this value, the filesystem is invalid, and the OS should proceed no
+further.</p>
+<p>A <code>uint</code> is a 32-bit (4 byte) unsigned integer. There is no padding between the fields of the
+superblock, so since there are 8 32-bit fields, the superblock uses 32 bytes of its 1024 byte
+block. So, taking the values from what we saw in <code>xv6fs info</code> above, this is what we&rsquo;d imagine
+the superblock to look like (well, minus the unused 992 bytes):</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/superblock-imagined.svg" alt="Diagram showing expected superblock byte layout: 8 four-byte fields in sequence - magic 0x10203040, size 2000, nblocks 1954, ninodes 200, nlog 30, logstart 2, inodestart 32, bmapstart 45"></p>
+<p>Let&rsquo;s check our hypothesis! If we run <code>./xv6fs dump fs.img -b 1</code>, we can see a hex dump of block
+number 1: the superblock.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/superblock-actual.png" alt="Hex dump of block 1 showing superblock bytes in little-endian order: 40 30 20 10 for magic number, d0 07 00 00 for size, and subsequent field values similarly backwards"></p>
+<p>Huh, well that&rsquo;s disappointing. Right at the beginning, we expect to see the magic number,
+<code>0x10203040</code>, but what we see is <code>0x40302010</code>. Notice that all of the other 4-byte chunks are
+also backwards. So, what gives?</p>
+<p>As it turns out, xv6 uses little-endian layout for its filesystem structures. This means that the
+least significant byte of any multi-byte values will be stored, physically, ahead of more
+significant bytes. Do note that this only applies to multi-byte values. A single byte is always
+a single byte. But when a type needs more than one byte for representation, xv6 will put the LSB
+(least significant byte) first and the MSB (most significant byte) last.</p>
+<p>We&rsquo;re going to talk about the key filesystem data structures in later sections and relate them back
+to how the superblock allows for finding them. But, first, let&rsquo;s take a quick detour to answer the
+question, why isn&rsquo;t the superblock <em>actually</em> the first block if it&rsquo;s so important?</p>
+<h3 id="boot-block-whats-before-the-superblock">
+  Boot Block: What&rsquo;s Before the Superblock?
+  <a class="heading-link" href="#boot-block-whats-before-the-superblock">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Before an operating system can load a filesystem, there has to <em>be</em> a running OS. The code that
+does the initial bootup has to be stored someplace, and it needs to be somewhere that the
+processor can easily find in order to load the boot instructions up.</p>
+<p>One common technique, particularly early on, was for the first block to include these boot
+instructions. xv6 reserves the very first block for this, to follow convention, however it does
+not actually use it for anything. It relies on other means, such as QEMU configuration,
+for the (virtual) processor to load the kernel. This is why block 0 is empty, and the superblock
+is at block number 1.</p>
+<h2 id="inodes-from-names-to-bytes">
+  Inodes: From Names to Bytes
+  <a class="heading-link" href="#inodes-from-names-to-bytes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Next, let&rsquo;s take a look at an incredibly important structure type in the xv6 filesystem: the inode.
+From the operating system&rsquo;s perspective, the inode represents a file, a directory, or even a device
+on the filesystem. Every inode has a unique number, and through directory structures, the
+filesystem allows the OS and users to locate any object by name. We&rsquo;re going to look at this in
+more detail, but first, let&rsquo;s take a look at how inodes are defined.</p>
+<p>Back in <a href="https://github.com/mit-pdos/xv6-riscv/blob/7d7adbb1b0acbd67c9766a20d0f9900fef2789fa/kernel/fs.h#L32-L39"  class="external-link" target="_blank" rel="noopener">kernel/fs.h</a>, there is a structure, <code>dinode</code> which describes the on-disk
+format of an inode:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> dinode {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">short</span> type;           <span style="color:#928374;font-style:italic">// File type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">short</span> major;          <span style="color:#928374;font-style:italic">// Major device number (T_DEVICE only)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">short</span> minor;          <span style="color:#928374;font-style:italic">// Minor device number (T_DEVICE only)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">short</span> nlink;          <span style="color:#928374;font-style:italic">// Number of links to inode in file system
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint size;            <span style="color:#928374;font-style:italic">// Size of file (bytes)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint addrs[NDIRECT<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>];   <span style="color:#928374;font-style:italic">// Data block addresses
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// This is not right here in the source, but for blog context:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#define NDIRECT 12
+</span></span></span></code></pre></div><p>We saw earlier that the superblock has a record of the number of inodes in the filesystem. In the
+<code>xv6fs info</code> output, we also saw a number of &ldquo;inode blocks.&rdquo; These blocks contain all of the
+inodes for the filesystem - essentially, a lot of the structs described above, in a row.</p>
+<blockquote>
+<p>Aside: There is also a separate structure for the in-memory representation of an inode. It
+contains additional runtime information that allows the OS to operate on open files. But that&rsquo;s
+a physiology lesson, and we&rsquo;re talking about anatomy here. Curious readers should look for
+<code>struct inode</code> in kernel/file.h.</p></blockquote>
+<p>There are a few types of inodes, defined like so in <a href="https://github.com/mit-pdos/xv6-riscv/blob/7d7adbb1b0acbd67c9766a20d0f9900fef2789fa/kernel/stat.h#L1-L3"  class="external-link" target="_blank" rel="noopener">kernel/stat.h</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8ec07c">#define T_DIR     1   </span><span style="color:#928374;font-style:italic">// Directory
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#define T_FILE    2   </span><span style="color:#928374;font-style:italic">// File
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#define T_DEVICE  3   </span><span style="color:#928374;font-style:italic">// Device
+</span></span></span></code></pre></div><p>If an inode has a <code>type</code> field that equals 1 (<code>T_DIR</code>), it is a directory, 2 (<code>T_FILE</code>)
+is a regular file, and 3 (<code>T_DEVICE</code>) is a device.</p>
+<p>The <code>nlink</code> field indicates how many names within the filesystem structure refer to this inode.
+Commonly, an inode will have a single name. However, there are also often cases where you may
+want to have a second name within the filesystem refer to the same inode - this is known as
+linking. (Specifically, in OS terminology, this would be known as a &ldquo;hard link&rdquo; as opposed to a
+&ldquo;symlink.&rdquo;) When there are no longer any links to an inode, that inode is effectively deleted
+because there is no longer any way for a user to access the inode.</p>
+<p>The inode also includes the <code>size</code> of the file. We discussed earlier that the filesystem allocates
+space by 1024-byte blocks. However, most files won&rsquo;t be an even multiple of 1024. The <code>size</code>
+captures how much space is actually used. It tells users or processes reading the file
+how many bytes of actual data exist.</p>
+<p>For directories and files, the inode needs to maintain a reference to each data block allocated
+to the inode. This is where the <code>addrs</code> array comes into play. This is a 13-element array of
+<code>uint</code>, where each element is a block number. The first element in the array contains the block
+number of the first data block, the second element maps to the second data block number,
+and so on until the twelfth element. These are the &ldquo;direct blocks.&rdquo; Because each block is 1024
+bytes, this means that the first 12,288 (12KiB) bytes of a file may be found by looking up the
+inode and then cycling through the blocks identified in the first 12 spots. The final <code>addr</code>
+element is kind of special - we&rsquo;ll talk about it more in a bit.</p>
+<p>As the comments for <code>major</code> and <code>minor</code> indicate, these fields are only relevant when the inode is
+a device. There is an idea in UNIX that says &ldquo;everything is a file.&rdquo; This applies just as
+much to I/O devices as it does to what we think of as files. Devices in xv6 can be named and
+therefore found in the filesystem&rsquo;s tree, but instead of mapping to disk blocks, these inodes
+tell the OS which device it actually refers to.</p>
+<h3 id="files">
+  Files
+  <a class="heading-link" href="#files">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>That&rsquo;s a lot of text, but I promised pictures! Let&rsquo;s take a closer look at a file inode. Running
+<code>./xv6fs stat fs.img -i 2</code>, we can see the details of the second inode, which you&rsquo;ll have to take
+my word for right now, is a file.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/stat-inode-file.png" alt="Screenshot of xv6fs stat command for inode 2 showing a file type inode, size 2292 bytes, 1 link, and data blocks 47, 48, 49"></p>
+<p>One thing to pay attention to is the &ldquo;path,&rdquo; which is the name of the file. A file name is not part
+of the inode - the name is a link (described above) <em>to</em> the inode. We&rsquo;ll see how those names
+get mapped to inodes shortly. The inode does, however, &ldquo;know&rdquo; that there is a single link to it.</p>
+<p>Given the <code>struct dinode</code> definition above, along with this output, let&rsquo;s take a guess at what
+this would look like. (Remember that all xv6 filesystem structures are little-endian, including
+inodes.)</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/file-inode-imagined.svg" alt="Diagram showing expected inode byte layout for inode 2: type 2, major 0, minor 0, nlink 1, size 2292, followed by block addresses 47, 48, 49 and zeros for unused address slots"></p>
+<p>This is the second inode on the filesystem, so where is it? Well, remember that the superblock
+told us the first inode block was number 32. Each inode is 64 bytes. So, if we looked at offset
+128 (hex offset <code>0x80</code>) of block 32, we should find the inode we&rsquo;re interested in. Running
+<code>./xv6fs dump fs.img -b 32</code> and then honing in on that offset reveals the following for inode 2.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/dump-inode-file.png" alt="Hex dump of block 32 at offset 0x80 showing inode 2 bytes matching the expected layout"></p>
+<p>Nice!</p>
+<p>Let&rsquo;s take a quick peek at what&rsquo;s actually <em>in</em> this file. We have all of the data block numbers,
+so let&rsquo;s look at the first few lines of the first one. Running <code>./xv6fs dump fs.img -b 47</code>, we
+get something like this:</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/dump-data-readme.png" alt="Hex dump of block 47 showing ASCII text content of the xv6 README file, with readable text visible in the right column including the start of the README"></p>
+<p>As you may surmise from the right-hand side of the output, this file is actually the README for
+xv6, which is included in the filesystem when building using <code>make qemu</code>. It&rsquo;s convenient to have
+a text file to <code>cat</code> in the OS, so why not the project README? Regardless, at this point, we&rsquo;re
+seeing what you may think of as &ldquo;actual&rdquo; data, not filesystem overhead.</p>
+<blockquote>
+<p>Note: If you&rsquo;re following along using xv6fs, you can also use the <code>-i</code> or <code>--inode</code> flag
+with the <code>dump</code> command to dump all the data blocks associated with an inode. This way, you don&rsquo;t
+have to run the tool over and over to get each one. And, if you only want to see the file&rsquo;s
+full contents, not the hex dump of each block, you can use <code>./xv6fs cat fs.img -i &lt;inode number&gt;</code>
+instead.</p></blockquote>
+<p>We&rsquo;ve seen that inodes don&rsquo;t have names. But we know that, of course, we can reference files <em>by</em>
+name. So, let&rsquo;s take a look at how this mapping works next.</p>
+<h3 id="directories">
+  Directories
+  <a class="heading-link" href="#directories">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Directories are inodes, just like files are inodes. However, the contents of the data block(s) of
+directory inodes are not &ldquo;user data,&rdquo; but rather sets of another xv6 filesystem data structure
+type: the directory entry (&ldquo;dirent&rdquo;).</p>
+<p>Once again back in <a href="https://github.com/mit-pdos/xv6-riscv/blob/7d7adbb1b0acbd67c9766a20d0f9900fef2789fa/kernel/fs.h#L56-L59"  class="external-link" target="_blank" rel="noopener">kernel/fs.h</a>, we find <code>struct dirent</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> dirent {
+</span></span><span style="display:flex;"><span>  ushort inum;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">char</span> name[DIRSIZ];
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// This is not right here in the source, but for blog context:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#define DIRSIZ 14
+</span></span></span></code></pre></div><p>As the field names suggest, a dirent contains an inode number (inum) along with a name. When a user
+wants to access a file by name, the OS will search the directory entries until it finds a matching
+name and then return the pointed-to inode. (If no matching name is found, the user would get a
+&ldquo;file not found&rdquo; error.)</p>
+<p>The <code>name</code> follows C string conventions, in that names are 0 terminated. However, for
+simplicity, xv6 elects to cap the name of each entry at 14 characters. Because the inum is a
+two-byte <code>ushort</code>, this also conveniently fixes the dirent size at a nice, round, length of 16
+bytes, which also happens to evenly divide into 1024. This means each data block of a directory can
+hold 64 dirents.</p>
+<p>We know, from above, that inode 2 is the project README. Assuming it has a dirent name of &ldquo;README,&rdquo;
+we&rsquo;d expect its dirent to look like this:</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/dirent-readme.svg" alt="Diagram showing expected directory entry layout for README: 2-byte inum value of 2, followed by 14-byte name field containing ASCII representation of R-E-A-D-M-E and null padding"></p>
+<p>Remember this: we&rsquo;re going to come back to it shortly and see if we were right. First, we need to
+know how to find the directory where this dirent would even be!</p>
+<p>UNIX-based filesystems are based on tree data structures, with a single root, branches and
+leaves extending from there. You can find any file in the entire filesystem by traversing the
+correct path through the tree. Leaf inodes are files or devices; branch inodes are other directories.</p>
+<p>If you&rsquo;re familiar with MacOS or Linux, for instance, you&rsquo;ve probably noticed that absolute paths
+all start with a <code>/</code>. The <code>/</code> is the filesystem root directory, and, as you may have guessed, it&rsquo;s
+just another inode!</p>
+<p>The only really unique thing about this inode is that the OS has to &ldquo;know&rdquo; where to find it. Just
+like xv6 requires the superblock to be at block number 1, the root is always inode number 1. (Tip
+for curious readers: If you want to look for this in the xv6 source, look for <code>ROOTINO</code>.) Let&rsquo;s
+take a look at that inode.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/root-inode-stat.png" alt="Screenshot of xv6fs stat command for inode 1 showing a directory type inode with 2 links, size 1024 bytes, and one data block at block 46"></p>
+<blockquote>
+<p>Note that there is still no path stored on this inode, just like any other inode. xv6 just has
+a static mapping from &ldquo;/&rdquo; to the root inode number, which it uses to resolve paths to inodes.</p></blockquote>
+<p>Let&rsquo;s get a sense of what&rsquo;s inside the root directory, using <code>./xv6fs ls fs.img -i 1</code> (you could
+also use the path, <code>./xv6fs ls fs.img /</code> instead).</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/ls-root.png" alt="Screenshot of xv6fs ls command for root directory showing entries: dot and dotdot directories, README file with inode 2 and size 2292 bytes, console device, and various executable files including cat, echo, grep, and others"></p>
+<p>Cool, so this confirms that the &ldquo;name&rdquo; of the README is, in fact, &ldquo;README.&rdquo; It also looks to be
+the third directory entry (we&rsquo;ll come back to those first two). We also know from the <code>stat</code> above
+that the root inode has one data block, block number 46. Since each dirent is 16 bytes, and the
+README is the third dirent, we should find it at offset 32 (hex <code>0x20</code>) inside that data block.
+Let&rsquo;s see if we were right up above, by doing <code>./xv6fs dump fs.img -b 46</code> and focusing on that
+offset:</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/actual-dirent-readme.png" alt="Hex dump of block 46 at offset 0x20 showing the README directory entry: bytes 02 00 for inum 2, followed by ASCII bytes for README and null padding"></p>
+<p>Neat! Looks like we were right!</p>
+<p>Going back to the previous <code>xv6fs</code> output, notice that we also see the inode types of each entry
+in the directory. It did a little extra work to determine the type and size (it iterated
+through the dirents, fetching each inode to get the type and size). But note that dirent inodes
+don&rsquo;t <em>have</em> to be file inodes. A directory entry can refer to other directories, which could
+also refer to even other directories, to produce a filesystem tree structure. Additionally, note
+that the console inode is a device.</p>
+<p>The directory <code>test-dir</code> is one that I put in there to show another directory because the
+default &ldquo;fs.img&rdquo; does not include subdirectories. Let&rsquo;s look at its directory listing, with
+<code>./xv6fs ls fs.img /test-dir</code></p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/ls-test-dir.png" alt="Screenshot of xv6fs ls command for test-dir showing only dot and dotdot entries, with dot pointing to inum 21 and dotdot pointing to inum 1"></p>
+<p>OK, admittedly not the most exciting thing in the world, but it <em>is</em> kind of interesting to see
+the same &ldquo;.&rdquo; and &ldquo;..&rdquo; entries we noticed in &ldquo;/&rdquo; as well. When creating directories in xv6, it will
+automatically create these two entries, to simplify relative path traversal. &ldquo;.&rdquo; refers to &ldquo;this
+directory&rdquo; - you&rsquo;ll notice it has the same inum as &ldquo;test-dir&rdquo; did in the listing above.
+&ldquo;..&rdquo; refers to the parent directory, which you&rsquo;ll notice is the root inode number.</p>
+<p>At runtime, these simplify the work for users wishing to use relative paths instead of absolute
+paths. To be fair, there is also additional runtime information needed to make this happen, as
+each process also keeps track of its current working directory inode, so it has ready access to
+these relative paths. But, this is the purpose of these two odd-looking entries.</p>
+<blockquote>
+<p>Why is the inum for &ldquo;..&rdquo; still 1 in the root inode? Well, there is no &ldquo;up&rdquo; from the root inode:
+it&rsquo;s the <em>root</em> of the tree, after all. So, for the case of the root directory, both &ldquo;.&rdquo; and &ldquo;..&rdquo;
+point to itself.</p></blockquote>
+<p>We&rsquo;ve now got a good handle on what inodes are and how they allow the filesystem to map from names
+to actual data. We also know that there are 13 data block references in each inode, and each block
+can be 1024 bytes. But, that&rsquo;s not <em>that</em> much space, really. Let&rsquo;s take a quick peek at how
+xv6 enables larger files.</p>
+<h3 id="indirect-blocks-when-ndirect-isnt-enough">
+  Indirect Blocks: When NDIRECT Isn&rsquo;t Enough
+  <a class="heading-link" href="#indirect-blocks-when-ndirect-isnt-enough">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In the intro to inodes, we mentioned that the first 12 address entries point to the inode&rsquo;s data
+blocks. Since each block is 1024 bytes, this means that these blocks could store, at most, a total
+of 12,288 bytes (12KiB). But, there aren&rsquo;t 12 address blocks - there is a 13th one too! When more
+than 12KiB are required, xv6 will allocate an indirect pointer block and put its address into the
+13th spot.</p>
+<p>The format of this indirect pointer block is actually pretty straightforward. Block numbers are
+unsigned 32-bit (4-byte) integers, and this block just contains a sequence of these 4-byte
+addresses. Each of those pointed-to blocks contains (up to) another 1024 bytes of the file&rsquo;s
+contents.</p>
+<p>Let&rsquo;s look at it more closely. One large file in the filesystem image is called <code>usertests</code>. We
+can stat it to get a look at this inode (note that xv6fs also allows statting by filename, but
+we&rsquo;ve used inodes until now pedagogically). <code>./xv6fs stat fs.img usertests</code> gives us output
+that starts out:</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/stat-usertests.png" alt="Screenshot of xv6fs stat command for usertests file showing size 179192 bytes, 12 direct block addresses, and an indirect pointer at block 528 pointing to additional blocks beginning at 529. The screenshot cuts off after 539, but a comma suggests additional blocks."></p>
+<p>This file is 179,192 bytes, definitely larger than 12,288, so it requires indirect blocks. The
+<code>stat</code> output shows the block ID of the indirect pointer is 528. It points to 529, 530, 531, etc.
+We would expect, then, that the contents of block 528 would start out looking like this&hellip;</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/indirect-pointer.svg" alt="Diagram showing expected indirect pointer block layout: sequential 4-byte block addresses 529, 530, 531, 532 and continuing, each pointing to a data block"></p>
+<p>&hellip; and, indeed, that is what we find when we do <code>./xv6fs dump fs.img -b 528</code>:</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/dump-indirect-pointer.png" alt="Hex dump of block 528 showing indirect pointer entries in little-endian format: 11 02 00 00 for block 529, 12 02 00 00 for block 530, 13 02 00 00 for block 531, and so on"></p>
+<p>The indirect pointer design has some important implications. xv6 has <em>only</em> one indirect pointer
+block per inode, so the maximum file size is limited by how many blocks <em>it</em> can point to. With
+4-byte block addresses and 1024-byte blocks, it can point to 256 other blocks, max. That yields
+a maximum file size of 12KiB (direct) + 256KiB (indirect) = 268KiB, or 274,432 bytes.</p>
+<p>Other filesystems have other scaling mechanisms. This is another example of xv6 choosing simplicity
+over complexity for teaching purposes - scaling mechanisms don&rsquo;t really teach too much more about
+filesystem fundamentals, so there is no need to include them. But, you could imagine there are
+other techniques to provide larger file sizes.</p>
+<p>Another, more subtle, implication relates to performance. When reading data from one of the direct
+blocks, the OS has to look up the block ID from the inode and then read that block. For indirect
+blocks, the OS has to look up the indirect pointer ID, and <em>then</em> look up the appropriate
+indirect block before finally reading the data. Disk operations are extremely slow by software
+standards, so following on-disk pointers is not ideal. Real operating systems make extensive use
+of caching in order to improve performance. Indeed, even xv6, which we&rsquo;ve seen generally
+make simplifying design choices, includes caching for disk operations. This is a runtime
+(physiology) matter, but interested readers should look for <code>struct buf</code> in the xv6 source.</p>
+<p>Inodes are critical to the design of UNIX-based filesystems, and they directly relate to &ldquo;actual&rdquo;
+user data. There are a couple of other important xv6 filesystem &ldquo;bookkeeping&rdquo; structures that we
+saw referenced earlier in the <code>xv6fs info</code> output. We&rsquo;ll look at those next.</p>
+<h2 id="bookkeeping">
+  Bookkeeping
+  <a class="heading-link" href="#bookkeeping">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="free-space-map-finding-data-a-home">
+  Free Space Map: Finding Data a Home
+  <a class="heading-link" href="#free-space-map-finding-data-a-home">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>A filesystem is not static - files and directories may be added, deleted, and edited. When a new
+file is added, the filesystem needs to allocate an inode, of course, but it also needs to find
+someplace for that inode&rsquo;s data to go. The same is true when a file grows beyond a single 1024-byte
+data block, as the filesystem needs to find another block. And, if a file is deleted, and there
+are no more links to an inode, its data blocks should be freed so that other inodes could use the
+space if needed.</p>
+<p>In short, the filesystem needs to keep track of which blocks are free and which are not. That
+brings us to the free space bitmap.</p>
+<p>The bitmap is actually a fairly simple structure, which efficiently tracks block usage. All the
+filesystem needs to know about a block is, &ldquo;is it used, or is it not used?&rdquo; That&rsquo;s a binary
+question, and its answer can be represented as a 1 or a 0. If we had one giant &ldquo;blob&rdquo; of bits,
+where the index of each bit corresponded to a block ID, we could just check whether that position
+was a 0 or a 1 to know whether the block had been allocated. And, this is just what the free space
+bitmap is!</p>
+<p>Conceptually, it looks like the following, although we&rsquo;ll see it&rsquo;s subtly not <em>quite</em> how xv6 does
+it:</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/bitmap-overview.svg" alt="Diagram showing conceptual bitmap structure with bit positions 0 through 7 representing blocks 0 through 7, where 1 bits indicate allocated blocks and 0 bits indicate free blocks, with blocks 814 and 815 shown as free"></p>
+<p>A single block storing a free space bitmap could, therefore, handle a filesystem with up to
+8192 blocks (1024 byte block * 8 bits per byte). For the filesystem image we&rsquo;ve looked at, one
+bitmap block is, therefore, more than enough. You may have noticed the superblock did not track
+how many bitmap blocks there were, only where they started; it can easily calculate how many
+bitmap blocks there are by using this math and comparing to the size of the filesystem.</p>
+<p>The block numbers shown here are not arbitrary; if you look back at the output of <code>xv6fs info</code>
+from earlier in the post, you&rsquo;ll notice that it shows that block 814 is the first free block. So,
+this is logically what we&rsquo;d expect of the bitmap in our example filesystem image.</p>
+<p>Just like xv6 uses little-endian ordering for multi-byte data types, it does something similar
+for its free space bitmap. Where the diagram above shows offset 0 representing block 0, xv6
+instead groups blocks by 8 and stores the least-significant block ID in the 8th position and
+works back to the most significant bit.</p>
+<p>With that in mind, let&rsquo;s zoom in on the byte of the bitmap that contains our transition from
+the last few allocated blocks to the first free ones. Specifically, let&rsquo;s look at byte 101 of the
+bitmap, which will include bits for blocks 808-815. Here&rsquo;s what this would look like, again
+recalling that 815 will be the first bit and 808 will be the last.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/bitmap-byte-101.svg" alt="Diagram showing bitmap byte 101 with xv6 bit ordering: bits for blocks 808-813 set to 1 indicating allocated, bits for blocks 814-815 set to 0 indicating free, yielding hex value 0x3F"></p>
+<p>This works out to hex value <code>0x3f</code>, so that&rsquo;s what we&rsquo;ll expect to see in byte 101 in the free
+space bitmap. The <code>xv6fs dump</code> command groups output into 16-byte lines, so we&rsquo;re going to
+run <code>xv6fs dump fs.img -b 45</code> and hone in on the line at offset 96 (<code>0x60</code>).</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/bitmap-dump-byte-101.png" alt="Hex dump of block 45 at offset 0x60 showing bitmap bytes, with byte 101 containing value 3F confirming blocks 808-813 allocated and 814-815 free"></p>
+<p>There we go!</p>
+<p>Using this bitmap, whenever the OS needs to allocate a new data block, it can skim the bitmap
+and look for a 0 bit. The corresponding block is free. It can then set it to 1 and assign
+the block number to an inode. Likewise, in the case of a file being deleted, the OS can set
+each corresponding bit position to 0, signaling that they are free to allocate to other inodes
+in the future.</p>
+<h3 id="logging-protecting-data-even-when-things-go-wrong">
+  Logging: Protecting Data Even When Things Go Wrong
+  <a class="heading-link" href="#logging-protecting-data-even-when-things-go-wrong">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>And, with that, we&rsquo;ve looked at most of the major structures found within the xv6 filesystem! The
+remaining type is a redo log, though its structure is minimal. Filesystem logging is much
+more &ldquo;physiology&rdquo; than &ldquo;anatomy,&rdquo; but there is still <em>some</em> interesting structure we can
+evaluate. Before we do, though, we do need to take a brief physiology detour, consider the
+problems that logs solve, and get a sense of how they behave.</p>
+<h4 id="writing-to-disk-what-could-possibly-go-wrong">
+  Writing to Disk: What Could Possibly Go Wrong?
+  <a class="heading-link" href="#writing-to-disk-what-could-possibly-go-wrong">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Computers have a nasty tendency to crash on occasion. This can be due to software faults, hardware
+faults, or loss of power. Unfortunately, we don&rsquo;t get much choice in when this happens, either.
+(Based on personal experience, it tends to be the worst possible time.)</p>
+<p>Considering the filesystem structures we&rsquo;ve discussed, let&rsquo;s think about what might happen if
+we created a new directory, as an example. What filesystem structures change? Well, we know that
+a new inode will be created, so at least one of the inode blocks will need to be updated. The
+directory inode containing the new directory will need a dirent for it, so one of <em>its</em> data
+blocks also needs updated. We also need to find a location to put the new directory&rsquo;s data, so
+the free space bitmap needs updated as well. And, of course, the contents of the new directory
+will be written to whichever data block(s) the OS found for it in the bitmap.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/mkdir-affected-blocks.svg" alt="Diagram showing four filesystem blocks affected by mkdir operation: bitmap block for allocation tracking, inode block for new directory inode, new data block for directory contents, and parent directory data block for new dirent"></p>
+<p>This is a lot of writing to disk. Failure to make the appropriate updates to <em>every</em> block described
+would lead to an inconsistent state. Hypothetically, consider what it would mean if the computer
+crashed during this process, and the bitmap were the only block not updated before the crash.
+Well, the next time the OS started up, it would think that a block was free, but which had already
+been allocated to an inode. It would then give that block out to the next requested inode, and
+suddenly, two inodes are clobbering each other&rsquo;s data. Take a few minutes to think about what
+happens if any of the other blocks don&rsquo;t get written as well. (Hint: It&rsquo;s never good.)</p>
+<p>This brings us to the idea of a transaction. In computing, a transaction refers to a set of
+operations that must either <em>all</em> occur, or <em>none</em> must occur. Techniques for handling transactions
+are varied and are critical in both operating systems <em>and</em> distributed systems. One way to handle
+transactions is to, first, store a description of all the changes before telling the source that
+the change they requested is complete - this is the technique xv6 uses.</p>
+<p>The idea is: When a disk write occurs, calculate the new block data for every block involved. Write
+each of these blocks to special-purpose overhead blocks, essentially a scratchpad, not to their
+actual locations. Then, update an on-disk structure to signal that all of the appropriate scratch
+blocks are written. Begin updating the <em>actual</em> blocks by copying the contents from the scratch
+blocks into them. Once all have been copied, update the on-disk structure to signal the write is
+complete.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/mkdir-example-with-log.svg" alt="Diagram showing write-ahead logging process for mkdir: step 1 writes data to scratch blocks, step 2 writes block numbers to log header, step 3 writes count to commit transaction, step 4 copies to actual blocks, step 5 clears count to complete"></p>
+<p>The key insight is that none of the <em>final</em> blocks are touched until all of the data in all of the
+changed blocks is stored <em>somewhere</em>. The transaction is not crash consistent (recoverable) until
+the OS writes the count of data blocks to a specific location (the first log block). However, once
+that happens, the data in that transaction may be recovered, even following a crash.</p>
+<p>At this point, the OS writes the data from the scratch blocks over the previous data in the
+relevant non-log blocks. If this completes successfully, the count is reset in the log header.</p>
+<p>However, imagine that the power failed <em>during</em> step 4 in the diagram above. The machine would
+come back online, and while the OS started up, it would find a non-zero count in the log header.
+It could then simply begin copying from the &ldquo;scratch&rdquo; blocks to the actual locations, eventually
+clearing the count once it finished. Re-writing over blocks that had already changed makes no
+difference. Because only one transaction is tracked at a time, these changes are fully idempotent,
+so the changes can be replayed over and over again, as needed, until the transaction finally
+completes.</p>
+<h4 id="structure-of-a-log">
+  Structure of a Log
+  <a class="heading-link" href="#structure-of-a-log">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Not to put too fine a point on it, but it&rsquo;s important to note: the data in the scratch blocks will
+be identical to what will eventually go into the final location. This means, if a block is being used
+to temporarily store an inode block, there will be inodes in it. If it&rsquo;s a data block, it will be
+whatever data belongs to the file or directory. If it&rsquo;s a bitmap block, there will be a bitmap.
+The structure in <em>these</em> blocks is exactly the same type of structure we&rsquo;ve seen already.</p>
+<p>The very first log block holds the log header, though. It&rsquo;s quite minimal, really. In
+<a href="https://github.com/mit-pdos/xv6-riscv/blob/7d7adbb1b0acbd67c9766a20d0f9900fef2789fa/kernel/log.c#L35-L38"  class="external-link" target="_blank" rel="noopener">kernel/log.c</a>, we see the log header definition:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> logheader {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> n;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> block[LOGBLOCKS];
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// This is not right here in the source and is actually
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// calculated in regards to a different #define, but for
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// blog context:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#define LOGBLOCKS 30
+</span></span></span></code></pre></div><p>The header for the current transaction is written to the first log block when updated copies
+of all of the relevant log blocks have been written to other log blocks. The <code>block</code> array stores
+a list of the block numbers associated with the following log blocks. The field, <code>n</code>, indicates
+how many of the following log blocks are part of this transaction.</p>
+<p>Inspecting this with <code>xv6fs</code> is certainly possible, although catching a filesystem in the midst of
+a transaction is unlikely, at least without adjusting the kernel to trigger some bad behavior.
+But the OS has no need to clear the other log data. Once the log header&rsquo;s count is zeroed, any
+leftover data in the scratch blocks is simply ignored, which means there should be remnants of
+previous writes even after the transaction completes. Let&rsquo;s go spelunking and see what we can see.</p>
+<blockquote>
+<p>Note: If you&rsquo;re following along with xv6fs and using my sample image, this is what you should
+see. However, the contents in the log blocks are far more likely to diverge from mine if you are
+using an image of your own. The rest of this discussion should still help you decipher what&rsquo;s in
+your image, though.</p></blockquote>
+<p>Let&rsquo;s start by dumping the first log block: <code>./xv6fs dump fs.img -b 2</code>.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/dump-log-header-block.png" alt="Hex dump of block 2 showing log header: first 4 bytes are zero indicating no active transaction, followed by remnant block numbers 33, 45, 813, 46, and 32 from a previous mkdir operation"></p>
+<p>OK, so we know from the <code>struct logheader</code> definition that the count (<code>n</code>) will be the first four
+bytes of the header. As expected, it is zero - this filesystem image must not have any transactions
+in flight. But, we do see some non-zero values following it. I&rsquo;ll save you the little-endian and
+hex-to-decimal conversions and tell you the numbers listed are: 33, 45, 813, 46, and 32. Those
+look a lot like some of the block numbers we&rsquo;ve already seen in previous sections.</p>
+<p>Picking one, we know that block 45 is the free space bitmap block in this filesystem image. So,
+what happens if we dump the contents of the log scratch block corresponding to block 45? We can
+do that! This is the second item in the list, which means it will be in the second &ldquo;scratch&rdquo; block.
+Because the log header consumes the &ldquo;zeroeth&rdquo; log block, we can actually just index from the
+start of the log blocks to get it. That would put it at 2 (log block start) + 2 (position in the
+scratch block list) = block 4. Let&rsquo;s do <code>./xv6fs dump fs.img -b 4</code>.</p>
+<p><img src="/articles/2026/02/20/anatomy-of-a-filesystem-xv6/dump-log-bitmap-block.png" alt="Hex dump of block 4 showing remnant bitmap data from a previous transaction, with bit patterns indicating block allocation status"></p>
+<p>That looks an awful lot like a free space bitmap to me!</p>
+<p>If you&rsquo;re curious, the changed blocks are from the last change I made to this image, when
+I created the <code>/test-dir</code> directory that we looked at previously. (Also, why I chose that example
+for the log diagrams earlier!) <code>test-dir</code>&rsquo;s inum, 21, puts it on the second inode block because each
+inode block can hold 16 inodes. That means, block 33. It of course needed to find a free block
+in the bitmap (block 45), and the first block found was 813, which would have had &ldquo;.&rdquo; and &ldquo;..&rdquo;
+dirents added to it by the OS. The dirent for the root is in block 46, as we saw, and since we
+added a link to <code>/test-dir</code>, block 46 needed a new dirent added to it as well. And, because
+<code>/test-dir</code>&rsquo;s dirent for &ldquo;..&rdquo; points back to the root, the root inode (stored on block 32) needed
+its number of links incremented. So, for this small change, we touched five different blocks!</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>And with that, our look at the anatomy of the xv6 filesystem has come to an end. This is a
+simpler filesystem than those you&rsquo;d find in modern operating systems, but as we&rsquo;ve seen, there is
+still a lot of nuance to be found just looking at the most essential parts of a filesystem.</p>
+<p>I&rsquo;ve learned a lot from studying the xv6 filesystem and preparing both xv6fs and this blog post.
+I hope that if you find yourself studying filesystems or xv6 that the diagrams and &ldquo;live&rdquo;
+examples in this post can help you!</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2026
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

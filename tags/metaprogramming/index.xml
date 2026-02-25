@@ -6,7 +6,7 @@
     <description>Recent content in Metaprogramming on Nick Chandler</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 10 Jan 2026 22:56:18 -0500</lastBuildDate>
+    <lastBuildDate>Sat, 10 Jan 2026 22:53:14 -0500</lastBuildDate>
     <atom:link href="https://nickchandler.dev/tags/metaprogramming/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Programmatic Comptime Type Creation in Zig</title>

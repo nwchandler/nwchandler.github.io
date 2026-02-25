@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <title>
+  Anatomy of a Filesystem: xv6 · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="This post explores the layout of key structures in the xv6 filesystem. Diagrams and sample output from a CLI tool provide references.">
+<meta name="keywords" content="systems software, operating systems, distributed systems, compilers, networking, systems programming, virtualization, computer systems, software craftsmanship, technical writing, experiments, lab notes">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Anatomy of a Filesystem: xv6">
+  <meta name="twitter:description" content="This post explores the layout of key structures in the xv6 filesystem. Diagrams and sample output from a CLI tool provide references.">
+
+<meta property="og:url" content="http://localhost:1313/articles/2026/01/31/anatomy-of-a-filesystem-xv6/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="Anatomy of a Filesystem: xv6">
+  <meta property="og:description" content="This post explores the layout of key structures in the xv6 filesystem. Diagrams and sample output from a CLI tool provide references.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-01-31T19:00:00-05:00">
+    <meta property="article:modified_time" content="2026-01-31T19:00:00-05:00">
+    <meta property="article:tag" content="Filesystem">
+    <meta property="article:tag" content="Xv6">
+    <meta property="article:tag" content="Zig">
+
+
+
+
+<link rel="canonical" href="http://localhost:1313/articles/2026/01/31/anatomy-of-a-filesystem-xv6/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.css" media="screen">
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.css" media="screen">
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="http://localhost:1313/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://localhost:1313/articles/2026/01/31/anatomy-of-a-filesystem-xv6/">
+              Anatomy of a Filesystem: xv6
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-01-31T19:00:00-05:00">
+                January 31, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              2-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/filesystem/">Filesystem</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/xv6/">Xv6</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/zig/">Zig</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <ul>
+<li>Intro to series</li>
+<li>Background on why looking at layouts
+<ul>
+<li>A visual connection between concepts and implementation</li>
+<li>Compare to network packets / Wireshark</li>
+</ul>
+</li>
+</ul>
+<h2 id="brief-overview-of-filesystems">
+  Brief Overview of Filesystems
+  <a class="heading-link" href="#brief-overview-of-filesystems">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h2 id="why-xv6">
+  Why xv6?
+  <a class="heading-link" href="#why-xv6">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<ul>
+<li>Minimal OS, simple enough to understand deeply</li>
+<li>Contains essential OS concepts</li>
+</ul>
+<h2 id="the-50000-foot-view">
+  The 50,000 Foot View
+  <a class="heading-link" href="#the-50000-foot-view">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><code>xv6fs info</code></p>
+<h2 id="superblock-the-table-of-contents">
+  Superblock: The Table of Contents
+  <a class="heading-link" href="#superblock-the-table-of-contents">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<ul>
+<li>superlock struct listing</li>
+<li>describe sections of superblock</li>
+</ul>
+<h3 id="boot-block-whats-before-the-superblock">
+  Boot Block: What&rsquo;s Before the Superblock?
+  <a class="heading-link" href="#boot-block-whats-before-the-superblock">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>The first block of many filesystems may contain enough startup code for an OS to boot.</li>
+<li>xv6 keeps a block for this, for convention, but it does not use it. So, it&rsquo;s reserved and empty,
+with the superblock starting at block 1 (the second block).</li>
+</ul>
+<h2 id="inodes-from-names-to-bytes">
+  Inodes: From Names to Bytes
+  <a class="heading-link" href="#inodes-from-names-to-bytes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<ul>
+<li>Show dinode struct definition</li>
+<li>Addrs: direct vs indirect</li>
+</ul>
+<h3 id="files">
+  Files
+  <a class="heading-link" href="#files">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><code>xv6fs stat README</code>
+<code>xv6fs dump -i &lt;inum&gt;</code></p>
+<h3 id="directories">
+  Directories
+  <a class="heading-link" href="#directories">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>Just an inode like files</li>
+<li>Data contents are dirents
+<ul>
+<li>Show dirent struct definition</li>
+</ul>
+</li>
+<li>Root directory is inum 1 - every other directory or file found from there</li>
+</ul>
+<p><code>xv6fs ls /</code>
+<code>xv6fs stat /</code>
+<code>xv6fs dump -i 1</code></p>
+<h3 id="indirect-blocks-when-ndirect-isnt-enough">
+  Indirect Blocks: When NDIRECT Isn&rsquo;t Enough
+  <a class="heading-link" href="#indirect-blocks-when-ndirect-isnt-enough">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>Describe the layout of an indirect block</li>
+<li>Series of pointers to data blocks containing additional file content</li>
+<li>Describe the impact on the block size here to maximum file size
+<ul>
+<li>Other filesystems have other scaling mechanisms, but indirection is a simple and useful approach</li>
+</ul>
+</li>
+</ul>
+<h2 id="data-blocks-what-you-spent-that-money-on-disks-for">
+  Data Blocks: What You Spent That Money on Disks For
+  <a class="heading-link" href="#data-blocks-what-you-spent-that-money-on-disks-for">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><code>xv6fs dump</code></p>
+<h2 id="housekeeping">
+  Housekeeping
+  <a class="heading-link" href="#housekeeping">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="free-space-map-finding-data-a-home">
+  Free Space Map: Finding Data a Home
+  <a class="heading-link" href="#free-space-map-finding-data-a-home">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>Bitmap block(s)</li>
+</ul>
+<h3 id="logging-protecting-data-even-when-things-go-wrong">
+  Logging: Protecting Data Even When Things Go Wrong
+  <a class="heading-link" href="#logging-protecting-data-even-when-things-go-wrong">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<ul>
+<li>Log block(s)</li>
+<li>Teaser: This is an anatomy lesson, but logs relate more to physiology in general;
+we&rsquo;ll talk about this in future articles</li>
+</ul>
+<h2 id="putting-it-all-together-reading-a-file">
+  Putting it All Together: Reading a File
+  <a class="heading-link" href="#putting-it-all-together-reading-a-file">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><code>xv6fs cat /dir/hello.txt</code></p>
+<ul>
+<li>From <code>/</code> to <code>/dir</code></li>
+<li>From <code>/dir/</code> to <code>/dir/hello.txt</code></li>
+<li>From <code>/dir/hello.txt</code> to data block(s)</li>
+<li>Note how many different blocks had to be read
+<ul>
+<li>This is why caching is so important</li>
+</ul>
+</li>
+</ul>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2026
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.js"></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>
