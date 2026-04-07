@@ -346,7 +346,7 @@
 </span></span><span style="display:flex;"><span>      this is now the best process
 </span></span><span style="display:flex;"><span>    else, we already have a better option:
 </span></span><span style="display:flex;"><span>      move on to the next runnable process
-</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  if the best process is still none:
 </span></span><span style="display:flex;"><span>    wait a short time and then start again at the top
 </span></span><span style="display:flex;"><span>  else:
@@ -509,6 +509,8 @@
 <p>The second, more interesting challenge, involves some odd behavior I noticed while testing. In order to test the scheduler, I set the number of CPUs in my qemu machine to 1. (Dealing with one processor and multiple processes makes behavior more deterministic and ensures there is contention that forces scheduling behaviors you want to see.)</p>
 <p>When I first started up the machine with my stride scheduler, it just hung. The init process started, but it never finished starting up the shell. After some debugging, I found that the init process was going to sleep while trying to open the console (common for system calls), but it was failing to wake up. I found that the context of the process that tried to wake the init process <em>was</em> still the init process. However, there was a guard in the <code>wakeup()</code> function that prevents one process from waking itself. (Keen observers may have noticed that I removed this guard in the second commit, <a href="https://github.com/nwchandler/xv6-riscv/commit/0312496a63bc5e4ea7683210a0cb0c699c0dfae1#diff-f06ba4e6ae5b13cb787bad05af2c231bcf826410f25bfd78b18774115f0d20a8L648-R652"  class="external-link" target="_blank" rel="noopener">here</a>.)</p>
 <p>Very strangely, this behavior did not occur when starting with the default scheduler on one CPU. I don&rsquo;t think this is actually attributable to the stride scheduler, but rather due to schedule timing differences. I want to trace this more deeply and determine why my stride scheduler exposed this deadlock, while the round robin scheduler did not. For the time being, though, I skipped the guard check, and all appears to work properly.</p>
+<blockquote>
+<p>Edit (April 2026): I did eventually track this down! See <a href="https://nickchandler.dev/articles/2026/04/03/taking-interruptions-in-stride-debugging-an-xv6-lost-wakeup/" >Taking Interruptions in Stride: Debugging an xv6 Lost Wakeup</a> for the investigation.</p></blockquote>
 <h2 id="conclusion">
   Conclusion
   <a class="heading-link" href="#conclusion">

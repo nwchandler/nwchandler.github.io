@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Taking Interruptions in Stride: Debugging an xv6 Lost Wakeup · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="This post explores debugging the xv6 operating system with gdb and qemu monitors. The specific context includes identifying and then resolving the root cause of a bug introduced in a stride scheduler implementation, which caused a lost wakeup and apparent system hang on OS boot.">
+<meta name="keywords" content="systems software, operating systems, distributed systems, compilers, networking, systems programming, virtualization, computer systems, software craftsmanship, technical writing, experiments, lab notes">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Taking Interruptions in Stride: Debugging an xv6 Lost Wakeup">
+  <meta name="twitter:description" content="This post explores debugging the xv6 operating system with gdb and qemu monitors. The specific context includes identifying and then resolving the root cause of a bug introduced in a stride scheduler implementation, which caused a lost wakeup and apparent system hang on OS boot.">
+
+<meta property="og:url" content="https://nickchandler.dev/articles/2026/04/03/taking-interruptions-in-stride-debugging-an-xv6-lost-wakeup/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="Taking Interruptions in Stride: Debugging an xv6 Lost Wakeup">
+  <meta property="og:description" content="This post explores debugging the xv6 operating system with gdb and qemu monitors. The specific context includes identifying and then resolving the root cause of a bug introduced in a stride scheduler implementation, which caused a lost wakeup and apparent system hang on OS boot.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-04-03T19:39:43-04:00">
+    <meta property="article:modified_time" content="2026-04-03T19:39:43-04:00">
+    <meta property="article:tag" content="Xv6">
+    <meta property="article:tag" content="Gdb">
+    <meta property="article:tag" content="Qemu">
+    <meta property="article:tag" content="Debugging">
+    <meta property="article:tag" content="Concurrency">
+
+
+
+
+<link rel="canonical" href="https://nickchandler.dev/articles/2026/04/03/taking-interruptions-in-stride-debugging-an-xv6-lost-wakeup/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.7763f8bc6341ecf82378e867c285e1549abb063a899be313ccd25dbfcd24fa7d.css" integrity="sha256-d2P4vGNB7PgjeOhnwoXhVJq7BjqJm&#43;MTzNJdv80k&#43;n0=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.min.a00e6364bacbc8266ad1cc81230774a1397198f8cfb7bcba29b7d6fcb54ce57f.css" integrity="sha256-oA5jZLrLyCZq0cyBIwd0oTlxmPjPt7y6KbfW/LVM5X8=" crossorigin="anonymous" media="screen" />
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://nickchandler.dev/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://nickchandler.dev/articles/2026/04/03/taking-interruptions-in-stride-debugging-an-xv6-lost-wakeup/">
+              Taking Interruptions in Stride: Debugging an xv6 Lost Wakeup
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-04-03T19:39:43-04:00">
+                April 3, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              24-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/xv6/">Xv6</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/gdb/">Gdb</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/qemu/">Qemu</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/debugging/">Debugging</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/concurrency/">Concurrency</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>A few months ago, I decided to add a stride scheduler to the <a href="https://www.github.com/mit-pdos/xv6-riscv"  class="external-link" target="_blank" rel="noopener">xv6</a> operating system, to get a better
+understanding of OS schedulers. I wrote a <a href="https://nickchandler.dev/articles/2025/10/03/lab-report-adding-stride-scheduling-to-xv6/" >blog post</a> about the experience, including
+my code and how it performed. Toward the end of the post, I mentioned some
+<a href="https://nickchandler.dev/articles/2025/10/03/lab-report-adding-stride-scheduling-to-xv6/#unexplained-init-process-lockup" >odd behavior</a> when running my scheduler on a single-core VM. In
+particular, at bootup the OS would hang when starting the initial process. I was able to determine
+that the process had gone to sleep, but wakeups were failing because when they fired, <code>init</code> was
+still considered an active process. I worked around the issue by removing one of the wakeup
+guard conditions and decided to &ldquo;punt&rdquo; a deeper investigation.</p>
+<p>Finally, I <em>did</em> take the time to figure out the issue! Spoiler alert: It was my fault (who
+could have guessed?), and the resolution was a <a href="https://github.com/nwchandler/xv6-riscv/commit/c01473fb43a4d5d81a4bf2eddd27e5de53c80314"  class="external-link" target="_blank" rel="noopener">one-liner fix</a>. But, to
+troubleshoot, I was able to spend some quality time with <a href="https://www.sourceware.org/gdb/"  class="external-link" target="_blank" rel="noopener">GDB</a> and explore tracing in
+<a href="https://www.qemu.org/"  class="external-link" target="_blank" rel="noopener">QEMU</a>, while also deepening my understanding of concurrency and scheduling.</p>
+<p>In this post, I thought it would be worthwhile to document the process I followed, touch on some
+threads I pulled along the way, and to capture both the pathology and the resolution. Further,
+I&rsquo;ve recently realized that although I have spent a lot of time in my career troubleshooting, I
+have let the mental models I built along the way stay &ldquo;intrinsic.&rdquo; Several times, coworkers have
+asked me how I figured some random issue out - or, how I knew where to start looking - and all I
+really know is that it matches patterns I&rsquo;ve seen in the past. But, that&rsquo;s not really
+transferrable, and I think I can become a better engineer by deliberately documenting interesting
+analyses. So, the post is also an attempt at just that.</p>
+<blockquote>
+<p>Note: If you are interested in either following along or exploring on your own, I have added
+two commits to my xv6 repo. <a href="https://github.com/nwchandler/xv6-riscv/commit/dc57f782d0e075b679630cdaad289ce3266ba5c4"  class="external-link" target="_blank" rel="noopener">The first one</a> re-introduces the lost wakeup condition.
+<a href="https://github.com/nwchandler/xv6-riscv/commit/c01473fb43a4d5d81a4bf2eddd27e5de53c80314"  class="external-link" target="_blank" rel="noopener">The second one</a> fixes it.</p></blockquote>
+<h2 id="problem-presentation-and-initial-debugging">
+  Problem Presentation and Initial Debugging
+  <a class="heading-link" href="#problem-presentation-and-initial-debugging">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>As I developed the stride scheduler, I booted the OS several times along the way to ensure there
+were no panics or other unexpected errors. I was looking for crashes and did not adjust the
+configuration of the VM at that point. When it was time to actually test the behavior of the stride
+scheduler, though, I did need to make some VM changes. By default, the xv6 Makefile starts a VM
+with three CPUs. But, my goal for performance testing was to see how the stride scheduler
+behaved in the face of contention (more processes ready to run than there were processors). To
+simplify inducing contention, I switched to a single CPU so that I could execute my test program.</p>
+<blockquote>
+<p>Note: If you want to follow along, you can easily change the number of CPUs by adjusting
+the environment variable the Makefile looks for. In other words, in your shell, <code>export CPUS=1</code> and
+then <code>make qemu</code> to start the system.</p></blockquote>
+<p>Excited to see how my scheduler performed, I ran <code>make qemu</code> and saw the familiar spew of build
+logs followed by:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 1 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>xv6 kernel is booting
+</span></span></code></pre></div><p>&hellip; and then: nothing. Typically, you would quickly see a shell prompt (<code>$</code>) on the console at
+this point, but the system appeared to be locked up.</p>
+<h3 id="initial-debugging-and-workaround">
+  Initial Debugging and Workaround
+  <a class="heading-link" href="#initial-debugging-and-workaround">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Admittedly, it&rsquo;s been a few months now since I did this, and my analysis notes are mostly limited
+to what is in the earlier blog post. Using <code>printf</code> and <code>gdb</code>, I identified that the <code>init</code> process
+was sleeping and failing to wake up. Since <code>init</code> is responsible for starting all other userspace
+processes, if it fails, then essentially the system has nothing to do and will hang. It
+behaves a bit like an endless <code>for</code> loop of no-ops, as the scheduler cycles, looking for some
+process to run.</p>
+<p>At the time, I had an incorrect understanding of where <code>init</code> was getting stuck. Reverse engineering
+from the blog post, I think I thought it was trying to open up a console file descriptor, which
+is one of the first things that happens in <code>user/init.c</code>. What I know for certain, though, is that
+I found that a guard condition in <code>wakeup</code> was preventing the process from being woken. Specifically,
+when <code>wakeup</code> scans for sleeping processes, it will not select any process that it identifies is
+currently active, but <code>init</code> was still considered active for some reason even though it was asleep.
+Thinking this was to be expected for <code>init</code> at the time, I believed I had found some race condition
+that was exposed by my scheduler due to how its behavior differed from the default round-robin one.</p>
+<p>To add to my hypothesis, incorrect as it was, I looked at the git history on the <code>wakeup</code> function
+and found something interesting. Here is how it looks currently:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">wakeup</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>chan)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span>(p <span style="color:#fe8019">=</span> proc; p <span style="color:#fe8019">&lt;</span> <span style="color:#fe8019">&amp;</span>proc[NPROC]; p<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(p <span style="color:#fe8019">!=</span> <span style="color:#fabd2f">myproc</span>()){
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> SLEEPING <span style="color:#fe8019">&amp;&amp;</span> p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">==</span> chan) {
+</span></span><span style="display:flex;"><span>        p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>That <code>if(p != myproc())</code> is where it failed because <code>p</code> did, in fact, equal <code>myproc()</code>.
+However, it <a href="https://github.com/mit-pdos/xv6-riscv/blob/b48ea5d2209bb9addf43687739245734038b991e/kernel/proc.c#L589C1-L601C2"  class="external-link" target="_blank" rel="noopener">once looked like this</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">wakeup</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>chan)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span>(p <span style="color:#fe8019">=</span> proc; p <span style="color:#fe8019">&lt;</span> <span style="color:#fe8019">&amp;</span>proc[NPROC]; p<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> SLEEPING <span style="color:#fe8019">&amp;&amp;</span> p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">==</span> chan) {
+</span></span><span style="display:flex;"><span>      p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>(<a href="https://github.com/mit-pdos/xv6-riscv/commit/2875069973d3e0ca4a70f6e7648a92b14cf08ab6#diff-f06ba4e6ae5b13cb787bad05af2c231bcf826410f25bfd78b18774115f0d20a8R562-R567"  class="external-link" target="_blank" rel="noopener">Here&rsquo;s the commit that changed it</a>.)</p>
+<p>Wanting to move on to checking my scheduler&rsquo;s performance and then seeing that the current process
+check wasn&rsquo;t always there, I decided to revert <code>wakeup</code> to the way it once was. And,
+lo and behold, the system booted, and I was able to move on. It didn&rsquo;t feel like a satisfactory
+solution, but I made a judgment call to stick with the workaround for the time being and to
+come back at a later time to sort out the issue.</p>
+<h2 id="getting-reacclimated">
+  Getting Reacclimated
+  <a class="heading-link" href="#getting-reacclimated">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>A few days ago, I finally took the time to begin a proper investigation of the issue. Since it had
+been several months, I needed to reacclimate myself to the situation. I read my notes, of course,
+but decided to start, not quite from square one, but maybe square two or three.</p>
+<p>I reverted my previous change to <code>wakeup</code> and booted up with <code>make qemu</code> and confirmed the
+system hang behavior was present. Then, it was time to start debugging.</p>
+<h3 id="attaching-the-debugger">
+  Attaching the Debugger
+  <a class="heading-link" href="#attaching-the-debugger">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The xv6 OS runs in QEMU, which offers nice integration with the GDB debugger. Furthermore, the xv6
+authors even have a target in the project&rsquo;s <code>Makefile</code> to start the system up for debugging -
+<code>make qemu-gdb</code>. In essence, this target starts up the VM with QEMU listening for GDB connections
+on a pseudo-random port (the <code>-gdb tcp::&lt;a port calculated in the Makefile&gt;</code>) and halts VM execution
+until GDB is attached (the <code>-S</code> flag). By waiting for GDB to connect, you get an opportunity to
+watch the OS boot up from the very beginning - quite useful!</p>
+<p>Once QEMU is started, it&rsquo;s as simple as running <code>gdb</code> from another terminal window in the project
+directory, to get connected. (To be fair, it&rsquo;s this simple because the Makefile produces a
+<code>.gdbinit</code> file, which GDB will load automatically. But that file is pretty straightforward.)</p>
+<p>I wanted to first confirm the hangup behavior while the debugger was attached, so I simply ran
+<code>continue</code> from GDB to start the machine up. Again, the observed behavior was consistent - a message
+saying the kernel was booting and then nothing. Hitting Ctrl+C to pause execution, then using
+<code>backtrace</code> to see where it was after a few seconds, I saw that it was in the <code>stride</code> scheduler
+loop. Continuing on and pausing again a few times, this was always the case. It wasn&rsquo;t scientific,
+but I wanted to get a feel for what was happening.</p>
+<h3 id="an-aside-on-xv6-sleep-and-wakeup">
+  An Aside on xv6 Sleep and Wakeup
+  <a class="heading-link" href="#an-aside-on-xv6-sleep-and-wakeup">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In xv6, when a process does a slow (relatively speaking) operation, such as interacting with
+external devices like disks or UARTs, the kernel will set the interaction in motion and then put
+the process to sleep. The process will be marked as <code>SLEEPING</code>, with a reference to what xv6 calls
+a <code>channel</code> (a pointer to some struct of interest) to capture what the process is waiting
+on. At this point, another process can be switched in and get some time to execute while the
+external device is doing whatever it&rsquo;s supposed to do. When the external device finishes doing what
+it was asked, it sends an interrupt to the CPU, which ultimately winds up in a wakeup function,
+which wakes any process that was waiting on that particular operation.</p>
+<p>The function that puts a process to sleep is called <code>sleep</code>, and the function that wakes it up
+is called <code>wakeup</code>.</p>
+<h2 id="breaking-wakeup">
+  Breaking Wakeup
+  <a class="heading-link" href="#breaking-wakeup">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Because I knew <code>wakeup</code> was what I had patched before, I decided that it would be good to investigate
+it a bit. I restarted the machine and GDB, and did a <code>break wakeup</code> before continuing.</p>
+<blockquote>
+<p>Note: I learned along the way that you can also do <code>monitor system_reset</code> from GDB to restart
+the VM. This allows you to keep your GDB session, but to go back to the bootup process, which is
+very convenient! In fact, anything you can set from the QEMU monitor, you can do from GDB because
+it will pass anything after <code>monitor</code> along to QEMU to execute.</p></blockquote>
+<p>The first break was on a timer interrupt. I restarted the machine several times throughout
+troubleshooting and breaking wakeup, and I found this was pretty consistently the first wakeup
+call.</p>
+<p>Running <code>continue</code> again, the next <code>wakeup</code> was a bit different, and the backtrace looked
+intriguing:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>#0  wakeup (chan=0x80015ca8 &lt;bcache+24&gt;) at kernel/proc.c:646
+</span></span><span style="display:flex;"><span>#1  0x000000008000579c in virtio_disk_intr () at kernel/virtio_disk.c:321
+</span></span><span style="display:flex;"><span>#2  0x0000000080002642 in devintr () at kernel/trap.c:198
+</span></span><span style="display:flex;"><span>#3  0x0000000080002750 in kerneltrap () at kernel/trap.c:147
+</span></span><span style="display:flex;"><span>#4  0x000000008000522c in kernelvec ()
+</span></span></code></pre></div><p>There are a couple of interesting things here. First, GDB tells us that the channel is an offset
+from <code>bcache</code>, which is an in-memory cache of filesystem blocks. Additionally, the <code>wakeup</code> call is
+coming from <code>virtio_disk_intr</code>; this is the interrupt handler for the disk driver. So, pretty
+clearly, we&rsquo;re trying to wake up a process that had been waiting on disk access.</p>
+<p>Knowing that init would be the first (and at this point only) process in the <code>proc</code> list, I decided
+to confirm it was sleeping with <code>print proc[0]-&gt;state</code> and, seeing that it was, what channel it
+was waiting on using <code>print proc[0]-&gt;chan</code>. Indeed, GDB showed it was sleeping on
+<code>(void *) 0x80015ca8 &lt;bcache+24&gt;</code>. So, this wakeup was, in fact, intended for init.</p>
+<blockquote>
+<p>xv6 processes also have names, to aid in debugging. You can do <code>print proc[0]-&gt;name</code> and see
+that this is <code>&quot;initcode\000\000\000\000\000\000\000&quot;</code>.</p></blockquote>
+<p>At this point, I watched several more <code>wakeup</code> calls until it seemed as though all of them would
+be timer interrupts. I wanted to make sure there wasn&rsquo;t potentially some other wakeup to watch out
+for as well. So, the next step was to dig into what was putting init to sleep.</p>
+<h3 id="tip-setting-calling-function-conditional-breakpoints">
+  Tip: Setting Calling Function Conditional Breakpoints
+  <a class="heading-link" href="#tip-setting-calling-function-conditional-breakpoints">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>There are a lot of reasons why a function like <code>wakeup</code> could be called. For instance,
+every clock interrupt will call it. But, clock interrupts aren&rsquo;t particularly interesting for this
+investigation. Using GDB, if you know a potential caller you either <em>do</em> or <em>do not</em> care about,
+you can set conditional breakpoints to ease your debugging, such as in the following.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>break wakeup
+</span></span><span style="display:flex;"><span># GDB will print the breakpoint number
+</span></span><span style="display:flex;"><span>condition &lt;the breakpoint #&gt; !$_caller_is(&#34;clockintr&#34;)
+</span></span></code></pre></div><p>Here, since I know the clock interrupt&rsquo;s name is <code>clockintr</code>, I can ignore any times where that is
+the function that called <code>wakeup</code>.</p>
+<h3 id="watching-qemu-disk-operations">
+  Watching QEMU Disk Operations
+  <a class="heading-link" href="#watching-qemu-disk-operations">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>One of the personal goals I had for working on this problem was to also get a little more familiar
+with tooling QEMU provides for observing VMs. So, around this same time - and before I started
+looking at <code>sleep</code> - I decided to try tracing some disk operations in the QEMU monitor, to try
+and get a little more information on <em>what</em> this disk interrupt was notifying the OS of.</p>
+<p>In the QEMU monitor, I landed on the following as potentially interesting:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>trace-event virtio_notify on
+</span></span><span style="display:flex;"><span>trace-event virtio_blk_rw_complete on
+</span></span><span style="display:flex;"><span>trace-event virtio_blk_handle_read on
+</span></span><span style="display:flex;"><span>trace-event virtio_blk_req_complete on
+</span></span></code></pre></div><p>(To be fair, I found these in the QEMU monitor with <code>trace-event virtio&lt;TAB&gt;</code>. I&rsquo;d like to spend
+some time looking into other tracing capabilities in QEMU so I can observe my systems work more
+deeply.)</p>
+<p>Then, restarting the system, I saw the following in the QEMU console just as the GDB wakeup
+breakpoint hit:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>virtio_blk_handle_read vdev 0x7fb5d1f72800 req 0x7fb5d2858980 sector 2 nsectors 2
+</span></span><span style="display:flex;"><span>virtio_blk_rw_complete vdev 0x7fb5d1f72800 req 0x7fb5d2858980 ret 0
+</span></span><span style="display:flex;"><span>virtio_blk_req_complete vdev 0x7fb5d1f72800 req 0x7fb5d2858980 status 0
+</span></span><span style="display:flex;"><span>virtio_notify vdev 0x7fb5d1f72800 vq 0x7fb5d2f6e000
+</span></span></code></pre></div><p>I admit this wasn&rsquo;t immediately obvious to me, but this is why I wanted to check out QEMU tracing:
+to see how it works. If you read <a href="https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/" >Anatomy of a Filesystem: xv6</a>,
+you may remember that the superblock is block number 1, beginning at byte 1024 of the xv6 filesystem.
+QEMU virtio disks have sector sizes of 512B, so assuming they start numbering at 0, sector 2 would
+begin at byte 1024. And, if reading two sectors (<code>nsectors</code>), that would suggest reading an entire
+FS block. So, the QEMU trace suggests that it was asked to read the superblock from disk. We&rsquo;ll
+confirm this soon.</p>
+<h2 id="breaking-sleep">
+  Breaking Sleep
+  <a class="heading-link" href="#breaking-sleep">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>OK, so next up was to see what was going on with <code>sleep</code>. I did a <code>break sleep</code>, reset the system,
+and quickly saw this backtrace:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>#0  sleep (chan=chan@entry=0x80015ca8 &lt;bcache+24&gt;,
+</span></span><span style="display:flex;"><span>    lk=lk@entry=0x80021040 &lt;disk+296&gt;) at kernel/proc.c:615
+</span></span><span style="display:flex;"><span>#1  0x00000000800056c6 in virtio_disk_rw (b=b@entry=0x80015ca8 &lt;bcache+24&gt;,
+</span></span><span style="display:flex;"><span>    write=write@entry=0) at kernel/virtio_disk.c:285
+</span></span><span style="display:flex;"><span>#2  0x0000000080002ca6 in bread (dev=dev@entry=1, blockno=blockno@entry=1)
+</span></span><span style="display:flex;"><span>    at kernel/bio.c:99
+</span></span><span style="display:flex;"><span>#3  0x00000000800030d8 in readsb (sb=0x8001e350 &lt;sb&gt;, dev=1) at kernel/fs.c:35
+</span></span><span style="display:flex;"><span>#4  fsinit (dev=dev@entry=1) at kernel/fs.c:43
+</span></span><span style="display:flex;"><span>#5  0x00000000800018dc in forkret () at kernel/proc.c:601
+</span></span><span style="display:flex;"><span>#6  0x00000000800018b0 in myproc () at kernel/proc.c:89
+</span></span><span style="display:flex;"><span>Backtrace stopped: frame did not save the PC
+</span></span></code></pre></div><p>Now, the &ldquo;backtrace stopped&rdquo; message seemed odd, and I confirmed <code>myproc</code> does not call <code>forkret</code>.
+I believe these are artifacts of GDB not fully understanding how xv6 context switches happen, and
+so these are spurious. The rest of the backtrace is legit, though.</p>
+<p>So, what do we see here? Well, first off, the channel is the same as the wakeup channel we saw
+earlier, so this certainly seems to be the sleep that we later try, unsuccessfully, to wake. We&rsquo;re
+going to come back to <code>sleep</code>, but also notice in the call stack <code>virtio_disk_rw</code> (there&rsquo;s our
+disk operation), <code>bread</code> (a buffered read - it will put data read from disk into the <code>bcache</code>
+in-memory cache), and <code>readsb</code> (this function reads the superblock - that seems to match up with
+that QEMU trace above).</p>
+<p>I think it&rsquo;s worth quickly digging into <code>fsinit</code> and <code>forkret</code> a little more deeply. <code>forkret</code> is
+the first function called when a process is scheduled for the first time. The mechanism for this
+is interesting. Whenever a new process is created, one of the key functions is called <code>allocproc</code>.
+This function looks for an open spot in xv6&rsquo;s process table and allocates it, as the name suggests.
+Just before returning, <code>allocproc</code> includes this bit of code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>p<span style="color:#fe8019">-&gt;</span>context.ra <span style="color:#fe8019">=</span> (uint64)forkret;
+</span></span></code></pre></div><p>This line sets the return address for the process&rsquo;s context to the address of <code>forkret</code>.
+This means that when the scheduler first schedules the process, and it switches contexts, this is
+where the process is set to begin.</p>
+<p><code>forkret</code> is a pretty small function. Essentially it ensures that, exactly one time - when the very
+first process runs - the filesystem is initialized. Primarily, it initializes the transaction
+log for the filesystem. As you might imagine, this also requires first reading the superblock, so
+that it can figure out where the log blocks are located. Since init is the first process in
+all cases, it will be the process to set up the filesystem. Once the filesystem has been
+initialized, execution passes along to the userspace code of the application via <code>usertrapret</code>.</p>
+<p>So, to put our <code>sleep</code> in context, init is trying to read the superblock in order to initialize
+the filesystem. This is the sleep it never wakes up from.</p>
+<h2 id="differential---comparing-to-round-robin">
+  Differential - Comparing to Round Robin
+  <a class="heading-link" href="#differential---comparing-to-round-robin">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>With this context in mind, we now know what init is trying to do. Since we know that the default
+scheduler does not cause a system hang on a single CPU, it seems like a reasonable idea to compare
+how things look when its corresponding <code>wakeup</code> is called. Now, knowing that the result of <code>myproc</code> is
+what was causing the guard to trip, it seemed like this would be a particularly worthwhile
+comparison. So, first, on the stride scheduler, I reset the system and broke on <code>wakeup</code>. Then, I
+was able to get the process from GDB by having it evaluate <code>myproc</code> for me:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>call myproc()
+</span></span><span style="display:flex;"><span>$9 = (struct proc *) 0x8000fe78 &lt;proc&gt;
+</span></span></code></pre></div><p>At this point, I swapped out the stride scheduler with the default scheduler by updating <code>kernel/main.c</code>
+to call <code>scheduler</code> instead of <code>stride</code>. I restarted the system; this one required an actual stop
+and start because the code had to recompile. Then, I did the same thing:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>call myproc()
+</span></span><span style="display:flex;"><span>$1 = (struct proc *) 0x0
+</span></span></code></pre></div><p>Interesting! I wouldn&rsquo;t expect the address to necessarily be identical, but 0 definitely
+implies there&rsquo;s something different going on. <code>myproc</code> returns a pointer to a <code>struct proc</code>, so
+0 is a null pointer here. A null pointer in this context is meant to signify that there <em>is</em> no
+process running. And, since this does not point to a real process, the guard will never hit in
+this case.</p>
+<p>And, this makes sense. When the OS is scheduling processes or choosing which process to wake up,
+there, by definition, is no process running. So, if I could figure out why the stride scheduler
+was behaving differently here, I reckoned the system hang would be resolved.</p>
+<h2 id="exploring-context-switches">
+  Exploring Context Switches
+  <a class="heading-link" href="#exploring-context-switches">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>When the kernel needs to switch which process is running, it uses a function called <code>swtch</code> to
+perform a context switch. <code>swtch</code> saves the registers of whatever kernel thread is running into a
+block of memory and copies data out of a similar block of memory into the CPU registers. For
+example, let&rsquo;s take a look at the following bit of code from the round robin scheduler:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> RUNNABLE) {
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNING;
+</span></span><span style="display:flex;"><span>  c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> p;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>c<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context);
+</span></span></code></pre></div><p>We see that the scheduler has found a runnable process here, adjusts its state, makes a note of
+which process is running on the CPU (this is ultimately how <code>myproc</code> can identify the running
+process, by the way), and then it does a context switch. Whatever register values are being used
+by the processor <em>right at the time of the call to <code>swtch</code></em> will be saved to the context field of
+the CPU struct, and the register values will be replaced by the data in the process&rsquo;s context. At
+this point, execution flow switches over to whatever the process had been doing before the last time
+it got descheduled. Execution has left the scheduler, and the processor is doing something totally
+different at this point.</p>
+<p>In the case of the very first call to <code>init</code>, the next &ldquo;thing&rdquo; to do is <code>forkret</code> (this is what that
+<code>p-&gt;context.ra</code> assignment saw to earlier), so this is what the processor will do.</p>
+<p>But, at some point, we have to get back to the scheduler. There <em>is</em> more code after <code>swtch</code> after
+all. There are a few ways for this to happen in xv6, but it probably warrants finally looking at
+<code>sleep</code> as an example of the general pattern:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">sleep</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>chan, <span style="color:#fe8019">struct</span> spinlock <span style="color:#fe8019">*</span>lk)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(lk);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Go to sleep.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">=</span> chan;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> SLEEPING;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">sched</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Tidy up.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Reacquire original lock.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(lk);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>There&rsquo;s some lock coordination and then updating of state. Note that after the call to <code>sched</code>,
+the next step is to clear the sleeping channel. Like <code>swtch</code> (actually, because of it), we&rsquo;re
+going to jump around a little bit before we get to that point, though. Let&rsquo;s also look at <code>sched</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">sched</span>(<span style="color:#fabd2f">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fe8019">!</span><span style="color:#fabd2f">holding</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock))
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched p-&gt;lock&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>noff <span style="color:#fe8019">!=</span> <span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched locks&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> RUNNING)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched running&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">intr_get</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched interruptible&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  intena <span style="color:#fe8019">=</span> <span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span><span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>intena <span style="color:#fe8019">=</span> intena;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Note that <code>sched</code> also calls <code>swtch</code>, but this time, the arguments are reversed. It will store
+the current register values on the <em>process</em> struct, replacing them with the values from the CPU
+struct. And, when the processor moves on, we&rsquo;re &ldquo;teleported&rdquo; back to where the scheduler left off.</p>
+<p>With this understanding of how context switches work, let&rsquo;s look at what the stride scheduler does
+at this point.</p>
+<h2 id="the-fix-is-in">
+  The Fix is In
+  <a class="heading-link" href="#the-fix-is-in">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>All right, so in the scheduler, the <code>swtch</code> call starts up init, which ultimately winds up kicking
+off a disk read, which calls <code>sleep</code>, which ultimately gets us back to the point in code right after
+that first <code>swtch</code> call. If I had forgotten to clear the process on the CPU struct after this
+context switch, we would see the system hang. Here&rsquo;s what came just before and after the context
+switch in the stride scheduler:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>best<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNING;
+</span></span><span style="display:flex;"><span>c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> best;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>c<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span>best<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>best<span style="color:#fe8019">-&gt;</span>pass <span style="color:#fe8019">+=</span> best<span style="color:#fe8019">-&gt;</span>stride;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>best<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span></code></pre></div><p>This <em>seems</em> reasonable. The pass value is updated, at which point we&rsquo;re done with the process
+struct, so we release its lock and then update the CPU to indicate there are no running processes.</p>
+<p>To be fair, in the default scheduler, <code>c</code> is updated before the process lock is released. The shape
+of that code is a little different than how the stride scheduler works, but that <em>is</em> a difference.
+The process lock shouldn&rsquo;t impact updating <code>c</code> at all, but there&rsquo;s no harm in holding the lock while
+updating it either. I figured I&rsquo;d test whether the release order was the culprit. So, I moved
+<code>c-&gt;proc = 0</code> to between <code>swtch</code> and <code>release</code>, started the machine up again, and&hellip;</p>
+<p>&hellip; it worked! Yay, but also, boo. How could holding a lock on a process have any bearing on
+updating a cpu struct?</p>
+<h2 id="i-didnt-mean-to-interrupt">
+  I Didn&rsquo;t Mean to Interrupt
+  <a class="heading-link" href="#i-didnt-mean-to-interrupt">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I figured it was time to look a little closer at <code>release</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">release</span>(<span style="color:#fe8019">struct</span> spinlock <span style="color:#fe8019">*</span>lk)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fe8019">!</span><span style="color:#fabd2f">holding</span>(lk))
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;release&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  lk<span style="color:#fe8019">-&gt;</span>cpu <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__sync_synchronize</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__sync_lock_release</span>(<span style="color:#fe8019">&amp;</span>lk<span style="color:#fe8019">-&gt;</span>locked);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">pop_off</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>I&rsquo;ve removed some comments, but most of this relates to synchronization between CPUs and clearing
+the lock atomically. But, what is <code>pop_off</code> doing?</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">pop_off</span>(<span style="color:#fabd2f">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> cpu <span style="color:#fe8019">*</span>c <span style="color:#fe8019">=</span> <span style="color:#fabd2f">mycpu</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">intr_get</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;pop_off - interruptible&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(c<span style="color:#fe8019">-&gt;</span>noff <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;pop_off&#34;</span>);
+</span></span><span style="display:flex;"><span>  c<span style="color:#fe8019">-&gt;</span>noff <span style="color:#fe8019">-=</span> <span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(c<span style="color:#fe8019">-&gt;</span>noff <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> c<span style="color:#fe8019">-&gt;</span>intena)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">intr_on</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>pop_off</code> (and its counterpart, <code>push_off</code>) allow xv6 to track nested interrupt disable requests.
+When a process needs to temporarily disable interrupts, rather than setting this at the global level,
+it can use <code>push_off</code>. If interrupts were already disabled, there would be no perceptible difference in
+behavior, however the cpu struct would increment its <code>noff</code>. If, while interrupts were disabled,
+and there had been a <code>push_off</code>, the process needed to do some other action that required interrupts
+to be disabled, it could use a second <code>push_off</code>, which would increment <code>noff</code>. Now, the next time
+<code>pop_off</code> was called, <code>noff</code> would be decremented, but we wouldn&rsquo;t want to suddenly re-enable
+interrupts because they weren&rsquo;t enabled to begin with. Instead, another <code>pop_off</code> is required,
+which will decrement <code>noff</code> again, so that we can safely know whether to enable interrupts.</p>
+<p>The state of interrupts prior to the first <code>push_off</code> is tracked in the CPU&rsquo;s <code>intena</code> field
+(presumably &ldquo;interrupts enabled&rdquo;). Only if that is not 0 when the final <code>pop_off</code> happens will
+interrupts be enabled.</p>
+<p>We&rsquo;ve seen that <code>release</code> does a pop, and as you might imagine, its corresponding function,
+<code>acquire</code> does a push. Assuming that <code>noff</code> remained &gt;= 1 from the time the process lock was
+acquired to the time it was released, this would mean there would be no interrupts in the meantime.</p>
+<p>So, my hypothesis became: since <code>release</code> calls <code>pop_off</code>, which re-enables interrupts, the disk
+interrupt could fire <em>between</em> <code>release</code> and <code>c-&gt;proc=0</code>. At that point, <code>c-&gt;proc</code> would still
+point at init, so <code>wakeup</code>&rsquo;s guard condition would skip it.</p>
+<p>Let&rsquo;s use GDB to see if this is what&rsquo;s happening! Because there are a few settings here, I added
+the following to my <code>.gdbinit</code> file, so GDB would auto-load them. I&rsquo;ve added comments inline to
+describe each line&rsquo;s purpose.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># Display whether the CPU will enable interrupts
+</span></span><span style="display:flex;"><span># when noff becomes 0.
+</span></span><span style="display:flex;"><span>display cpus[0]-&gt;intena
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Display the nesting level of push_off/pop_off.
+</span></span><span style="display:flex;"><span>display cpus[0]-&gt;noff
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Watch any time the proc field changes on the first
+</span></span><span style="display:flex;"><span># (only) CPU.
+</span></span><span style="display:flex;"><span>watch cpus[0]-&gt;proc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Break directly after `swtch` in the stride scheduler.
+</span></span><span style="display:flex;"><span>break kernel/proc.c:539
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Break when the disk interrupt fires.
+</span></span><span style="display:flex;"><span>break virtio_disk_intr
+</span></span></code></pre></div><p>Using the <a href="https://github.com/nwchandler/xv6-riscv/commit/dc57f782d0e075b679630cdaad289ce3266ba5c4"  class="external-link" target="_blank" rel="noopener">&ldquo;broken&rdquo; commit</a>, I started up the system and traced execution with GDB.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>(gdb) c
+</span></span><span style="display:flex;"><span>Continuing.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Hardware watchpoint 1: cpus[0]-&gt;proc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Old value = (struct proc *) 0x0
+</span></span><span style="display:flex;"><span>New value = (struct proc *) 0x8000fe78 &lt;proc&gt;
+</span></span><span style="display:flex;"><span>stride () at kernel/proc.c:538
+</span></span><span style="display:flex;"><span>538         swtch(&amp;c-&gt;context, &amp;best-&gt;context);
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 1
+</span></span><span style="display:flex;"><span>(gdb) c
+</span></span><span style="display:flex;"><span>Continuing.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Breakpoint 2, stride () at kernel/proc.c:539
+</span></span><span style="display:flex;"><span>539         best-&gt;pass += best-&gt;stride;
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 1
+</span></span><span style="display:flex;"><span>(gdb) n
+</span></span><span style="display:flex;"><span>543         release(&amp;best-&gt;lock);
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 1
+</span></span><span style="display:flex;"><span>(gdb) n
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Breakpoint 3, virtio_disk_intr () at kernel/virtio_disk.c:296
+</span></span><span style="display:flex;"><span>296     {
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 0
+</span></span><span style="display:flex;"><span>(gdb) c
+</span></span><span style="display:flex;"><span>Continuing.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Hardware watchpoint 1: cpus[0]-&gt;proc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Old value = (struct proc *) 0x8000fe78 &lt;proc&gt;
+</span></span><span style="display:flex;"><span>New value = (struct proc *) 0x0
+</span></span><span style="display:flex;"><span>stride () at kernel/proc.c:502
+</span></span><span style="display:flex;"><span>502         intr_on();
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 0
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 0
+</span></span></code></pre></div><p>Pay special attention to when I &ldquo;next&quot;ed over the <code>release</code> call. In general, the next line would
+be whatever came after the previous. But, here, instead, execution has switched over to the
+interrupt handler. Only after continuing past that, do we see the proc value switch from init to 0.
+Since <code>intena</code> was 1, the <code>pop_off</code> in the <code>release</code> call stack enabled interrupts, allowing the
+disk to fire.</p>
+<p>OK, that seems to support the theory. Now, for good measure, I flipped over to the
+<a href="https://github.com/nwchandler/xv6-riscv/commit/c01473fb43a4d5d81a4bf2eddd27e5de53c80314"  class="external-link" target="_blank" rel="noopener">fixed commit</a> to see how it behaved.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>(gdb) c
+</span></span><span style="display:flex;"><span>Continuing.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Hardware watchpoint 1: cpus[0]-&gt;proc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Old value = (struct proc *) 0x0
+</span></span><span style="display:flex;"><span>New value = (struct proc *) 0x8000fe78 &lt;proc&gt;
+</span></span><span style="display:flex;"><span>stride () at kernel/proc.c:538
+</span></span><span style="display:flex;"><span>538         swtch(&amp;c-&gt;context, &amp;best-&gt;context);
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 1
+</span></span><span style="display:flex;"><span>(gdb) n
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Breakpoint 2, stride () at kernel/proc.c:539
+</span></span><span style="display:flex;"><span>539         c-&gt;proc = 0;
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 1
+</span></span><span style="display:flex;"><span>(gdb) n
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Hardware watchpoint 1: cpus[0]-&gt;proc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Old value = (struct proc *) 0x8000fe78 &lt;proc&gt;
+</span></span><span style="display:flex;"><span>New value = (struct proc *) 0x0
+</span></span><span style="display:flex;"><span>stride () at kernel/proc.c:540
+</span></span><span style="display:flex;"><span>540         best-&gt;pass += best-&gt;stride;
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 1
+</span></span><span style="display:flex;"><span>(gdb) n
+</span></span><span style="display:flex;"><span>544         release(&amp;best-&gt;lock);
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 1
+</span></span><span style="display:flex;"><span>(gdb) n
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Breakpoint 3, virtio_disk_intr () at kernel/virtio_disk.c:296
+</span></span><span style="display:flex;"><span>296     {
+</span></span><span style="display:flex;"><span>1: cpus[0]-&gt;intena = 1
+</span></span><span style="display:flex;"><span>2: cpus[0]-&gt;noff = 0
+</span></span></code></pre></div><p>And, there we have it! By moving the <code>c-&gt;proc = 0</code> assignment above the release, we have ensured
+that this happens before the disk interrupt can fire.</p>
+<p>The best kind of bug fix is one that makes sense!</p>
+<h2 id="lessons-learned">
+  Lessons Learned
+  <a class="heading-link" href="#lessons-learned">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>One of the interesting things about observing OS behavior is that execution doesn&rsquo;t flow in the
+same way that application code does. For instance, <code>forkret</code> acts as the initial application
+entrypoint only because it is injected into the return address register for all new processes.
+Similarly, context switches also rely on swapping state between registers and memory directly,
+causing execution to jump in ways that are much different from synchronous application code. In the
+case of <code>swtch</code>, I&rsquo;ve come to think of it as a function that doesn&rsquo;t return to the caller, like <code>exec</code>
+(which, as I&rsquo;m writing this, I realize also doesn&rsquo;t return because it replaces process memory, similar to
+<code>swtch</code> in a sense). Unlike <code>exec</code>, though, you <em>can</em> return to the prior execution state by calling
+<code>swtch</code> a second time. You have to evaluate both &ldquo;ends&rdquo; of such processes to understand them,
+rather than relying on, for instance, a simple backtrace.</p>
+<p>Additionally, I tried to document some of the neat things I found with GDB and QEMU monitors in
+the post, but I learned that they both have some very interesting capabilities I wasn&rsquo;t aware
+of previously. GDB&rsquo;s conditional breakpoints are more nuanced than I expected, and I also learned
+how to define commands to run when hitting breakpoints. This is useful, for instance, to automatically
+print backtraces every time a breakpoint is hit, as a small quality-of-life improvement. And, QEMU
+traces offer a nice way to see events happening at the (virtual) hardware layer, which I suspect
+will come in very handy. At the very least, I know it&rsquo;s an option I can reach for in the future.</p>
+<p>Lastly, I knew I wanted to document this debugging effort, so I made some notes along the way. But,
+I feel like I can improve here. I&rsquo;d like to get more rigorous in how I investigate issues. I have
+developed some <a href="https://github.com/nwchandler/cs-lab-templates"  class="external-link" target="_blank" rel="noopener">lab guides</a> I use for experimentation. I think it would be
+worth expanding on these a bit, with a template for debugging sessions. I&rsquo;ve begun looking at
+processes that professionals in other domains (science and medicine, in particular) use to track
+such efforts. I plan to try some of those techniques and will build something based on what I
+find works for me. <em>Much</em> of the work I do is proprietary, so I can&rsquo;t really write much publicly,
+but I do want to use this for personal learning efforts, and these lab notes will help me write up
+additional summaries like this blog post in the future.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>All in all, this turned out to be an &ldquo;easy&rdquo; fix, but the exploration was really fascinating. I
+tried to describe the approximate journey I took in figuring this out, but of course, there were
+little detours along the way, for instance, to find GDB commands to do exactly what I wanted. I
+mention this only because it&rsquo;s not like I knew exactly the path from start to finish beforehand.
+Debugging is always a bit exploratory in nature. But I hope this has been an interesting story! I
+plan on documenting more of these in the future when I encounter them.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2026
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

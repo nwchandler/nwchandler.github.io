@@ -2,26 +2,41 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/</loc>
-    <lastmod>2026-02-20T19:00:00-05:00</lastmod>
+    <loc>https://nickchandler.dev/tags/concurrency/</loc>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
   </url><url>
-    <loc>https://nickchandler.dev/tags/filesystem/</loc>
-    <lastmod>2026-02-20T19:00:00-05:00</lastmod>
+    <loc>https://nickchandler.dev/tags/debugging/</loc>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/tags/gdb/</loc>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/</loc>
-    <lastmod>2026-02-20T19:00:00-05:00</lastmod>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/posts/</loc>
-    <lastmod>2026-02-20T19:00:00-05:00</lastmod>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/tags/qemu/</loc>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/</loc>
-    <lastmod>2026-02-20T19:00:00-05:00</lastmod>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/articles/2026/04/03/taking-interruptions-in-stride-debugging-an-xv6-lost-wakeup/</loc>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/xv6/</loc>
-    <lastmod>2026-02-20T19:00:00-05:00</lastmod>
+    <lastmod>2026-04-03T19:39:43-04:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/articles/2026/02/20/anatomy-of-a-filesystem-xv6/</loc>
+    <lastmod>2026-01-31T19:07:00-05:00</lastmod>
+  </url><url>
+    <loc>https://nickchandler.dev/tags/filesystem/</loc>
+    <lastmod>2026-01-31T19:07:00-05:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/zig/</loc>
-    <lastmod>2026-02-20T19:00:00-05:00</lastmod>
+    <lastmod>2026-01-31T19:07:00-05:00</lastmod>
   </url><url>
     <loc>https://nickchandler.dev/tags/comptime/</loc>
     <lastmod>2026-01-10T22:53:14-05:00</lastmod>
