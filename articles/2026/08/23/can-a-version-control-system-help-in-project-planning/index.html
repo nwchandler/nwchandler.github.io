@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <title>
+  Can a Version Control System Help in Project Planning? · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="This post looks at how I have been using the jj version control system to augment Mikado Method planning.">
+<meta name="keywords" content="systems software, operating systems, distributed systems, compilers, networking, systems programming, virtualization, computer systems, software craftsmanship, technical writing, experiments, lab notes">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Can a Version Control System Help in Project Planning?">
+  <meta name="twitter:description" content="This post looks at how I have been using the jj version control system to augment Mikado Method planning.">
+
+<meta property="og:url" content="http://localhost:1313/articles/2026/08/23/can-a-version-control-system-help-in-project-planning/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="Can a Version Control System Help in Project Planning?">
+  <meta property="og:description" content="This post looks at how I have been using the jj version control system to augment Mikado Method planning.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-08-23T19:00:00-04:00">
+    <meta property="article:modified_time" content="2026-08-23T19:00:00-04:00">
+    <meta property="article:tag" content="Software Engineering">
+    <meta property="article:tag" content="Mikado Method">
+    <meta property="article:tag" content="Jujutsu">
+    <meta property="article:tag" content="Version Control">
+
+
+
+
+<link rel="canonical" href="http://localhost:1313/articles/2026/08/23/can-a-version-control-system-help-in-project-planning/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.css" media="screen">
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.css" media="screen">
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="http://localhost:1313/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://localhost:1313/articles/2026/08/23/can-a-version-control-system-help-in-project-planning/">
+              Can a Version Control System Help in Project Planning?
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-08-23T19:00:00-04:00">
+                August 23, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              15-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/software-engineering/">Software Engineering</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/mikado-method/">Mikado Method</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/jujutsu/">Jujutsu</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/version-control/">Version Control</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>I&rsquo;ve <a href="http://localhost:1313/articles/2024/09/21/faster-software-development-with-the-mikado-method/" >written before</a> about how my team at work has adopted a variant of
+the <a href="https://www.manning.com/books/the-mikado-method"  class="external-link" target="_blank" rel="noopener">Mikado Method</a> for software project planning. We started this in 2023 and have evolved
+the process a bit since then. Most notably, we&rsquo;ve adopted a more strict process of prototyping
+during the planning phase. Where we originally only did a bit of spiking up front, we learned that
+our designs were better if the lead engineer actually built a &ldquo;walking skeleton.&rdquo; This code doesn&rsquo;t
+have much error checking, there are no tests, and small bits may still be implemented as pseudocode
+in comments, but it makes it clear where parts of the system interface with one another and what
+each must provide.</p>
+<p>The method works great (IMHO) when planning work for a team. It ensures the engineers working on
+implementation have a starting point (the prototype code), along with a work
+plan that allows incremental implementation (the Mikado chart, along with properly linked tickets in
+Jira).</p>
+<p>But, there are a few drawbacks to this process. First, creating the prototype can be quite
+time-consuming. Additionally, the designer bounces between a diagramming tool, to
+manage the Mikado chart, and their IDE, to write code. This disconnect between the plan and the
+prototype implementation makes it more difficult than it needs to be for engineers to map between
+the two.</p>
+<p>In this article, I&rsquo;m going to gloss over the first of those issues. Instead, I&rsquo;ll focus on
+how we have started to use the <a href="https://www.jj-vcs.dev"  class="external-link" target="_blank" rel="noopener">Jujutsu (jj)</a> version control system to address the latter.</p>
+<blockquote>
+<p>If you&rsquo;re curious about the former, we now have AI agents that happily and speedily produce
+not-quite-production-ready (prototype) code. We have started to lean on them for this process.
+However, we are still very careful to ensure that the scope of each node in the graph is small and
+targeted; after all, if a bug gets buried in a 2000-line PR, the agents aren&rsquo;t the ones waking up
+when it causes a pager to go off at 3am. Less sarcastically, modern AI models also allow us
+to explore different design and implementation options as well, so we can quickly get a sense
+of how multiple approaches &ldquo;feel&rdquo; to work with, which is a real time saver and system design win.</p></blockquote>
+<h2 id="the-key-insight">
+  The Key Insight
+  <a class="heading-link" href="#the-key-insight">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Both a project plan <em>and</em> a version control history are ultimately
+<a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph"  class="external-link" target="_blank" rel="noopener">directed acyclic graphs (DAGs)</a>. The key insight I had when thinking about the challenges
+listed above is this: if a node in a VCS graph could carry enough metadata to make its place in a
+project plan make sense, then the entire project plan could be represented within the graph itself.
+And, in our case, because the node would also contain just the prototype code for <em>that</em> node, it
+would become trivially easy to map between the code changes and the Mikado graph.</p>
+<p>That only works, though, if editing the version control DAG is easy. This is where jj comes in.</p>
+<h2 id="just-enough-jj">
+  Just Enough jj
+  <a class="heading-link" href="#just-enough-jj">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Jujutsu is a version control system that takes inspiration from earlier version control systems
+and abstracts the user interface from the underlying storage. In our case, Git is still the
+underlying storage for our repositories. However, jj gives us some capabilities that are nicer
+than working with Git natively.</p>
+<p>Critically, jj makes rebasing a breeze. Imagine you&rsquo;re working on a <a href="https://docs.jj-vcs.dev/latest/glossary/#change"  class="external-link" target="_blank" rel="noopener">change</a> (think
+of this like a mutable commit), and you spot an issue from an earlier change that needs fixing.
+You can switch to that one (<code>jj edit &lt;previous-change-id&gt;</code>), make the fix, and it will
+auto-propagate to all descendants. In the event of <a href="https://docs.jj-vcs.dev/latest/conflicts/"  class="external-link" target="_blank" rel="noopener">conflicts</a>, jj records them
+in the affected descendants instead of halting the rebase to make you fix them immediately.
+You can resolve them (<code>jj resolve</code>) whenever you&rsquo;re ready, and the fix flows down to the
+children the same way.</p>
+<p>If you&rsquo;re working on a change and decide you want to write some code that the change could
+rely on, you can create a brand new parent and do the work there (<code>jj new --insert-before @</code> to
+insert before the &ldquo;current&rdquo; change). And, again, that work will auto-propagate to descendants.
+This simplicity is a key benefit we&rsquo;ve found.</p>
+<p>Additionally, jj makes it simple to write great commit messages (jj calls these descriptions),
+even on empty changes. A simple <code>jj describe</code> pops up your favorite text editor, where you can
+write as much or as little as you want. And, you can evolve this. At any time, when you&rsquo;re on a
+change, you can run <code>jj describe</code> again to edit what you&rsquo;ve previously written, to better reflect
+the contents of the change. If you want to see the description along with the actual code
+for each change, it&rsquo;s as easy as <code>jj show</code>. Along with the ease of rebasing, this makes it
+quite easy to ensure changes are atomic - gone are the days of commits like &ldquo;wip&rdquo; or &ldquo;fix a typo.&rdquo;</p>
+<p>Admittedly, these are things that could be done using Git. But the ergonomics of jj feel more
+intuitive to me.</p>
+<h3 id="bookmarks-vs-branches">
+  Bookmarks vs Branches
+  <a class="heading-link" href="#bookmarks-vs-branches">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The biggest change, for me, going from Git to jj is that jj doesn&rsquo;t have branches in the sense
+that Git does. Instead, you create a bookmark (<code>jj bookmark create &lt;name&gt;</code>), which gives a name
+to a particular change. Switching to a bookmark is as easy as <code>jj edit &lt;name&gt;</code>.</p>
+<p>When interacting with Git, jj treats these bookmarks roughly as branches. When you sync from
+a Git repository, jj identifies branches as bookmarks. You tell jj which bookmarks you want to
+track from the origin (e.g., <code>jj bookmark track &lt;name&gt;@origin</code>). When you push to a Git repo
+(<code>jj git push</code>), jj will identify which tracked bookmarks have any differences with what&rsquo;s on the
+origin and push them. If there isn&rsquo;t already one, jj will create a Git branch with the
+bookmark&rsquo;s name on the remote. Note, though, that the bookmark <em>must</em> be tracked, so if this is
+a new bookmark, be sure to use <code>jj bookmark track</code> as described above to tell jj you want it
+kept in sync with the remote Git server.</p>
+<p>Another common trip-up to be aware of: If you create a change based on a bookmarked
+change, you need to remember to move it to the new change before pushing to Git
+(<code>jj bookmark move &lt;name&gt;</code>). Unlike adding commits to a Git branch, descendant jj changes are
+not automatically associated with a previous bookmark.</p>
+<p>This takes a little getting used to, but it&rsquo;s quite flexible. You don&rsquo;t have to pre-declare a
+branch for a change. You can let the graph evolve naturally and name bookmarks accordingly.</p>
+<h3 id="going-further">
+  Going Further
+  <a class="heading-link" href="#going-further">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>If you&rsquo;re interested in learning to use jj, I highly recommend <a href="https://www.youtube.com/watch?v=MR6KSB6I_60"  class="external-link" target="_blank" rel="noopener">this video</a> by
+Matthew Sanabria. It&rsquo;s an outstanding overview, and I share it with everyone I evangelize
+jj to! If you prefer text, Steve Klabnik&rsquo;s <a href="https://steveklabnik.github.io/jujutsu-tutorial/"  class="external-link" target="_blank" rel="noopener">Jujutsu Tutorial</a> is also excellent!</p>
+<h2 id="putting-it-together-planning-a-project">
+  Putting it Together: Planning a Project
+  <a class="heading-link" href="#putting-it-together-planning-a-project">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s take a look at how we can leverage this newfound knowledge to do a Mikado-style plan,
+similar to <a href="http://localhost:1313/articles/2024/09/21/faster-software-development-with-the-mikado-method/#an-example" >the example from my earlier post</a>. As a refresher,
+we say we have an application that counts the lines in files, and we want to add a CLI flag
+to count words instead.</p>
+<h3 id="bounding-the-dag">
+  Bounding the DAG
+  <a class="heading-link" href="#bounding-the-dag">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>I typically start by defining a start and an end point. Basing this off of the <code>main</code> bookmark
+(which I have set up to track the <code>main@origin</code> Git branch), I create two new changes and give
+them names.</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>jj new main
+</span></span><span style="display:flex;"><span>jj bookmark create start
+</span></span><span style="display:flex;"><span>jj new
+</span></span><span style="display:flex;"><span>jj bookmark create end
+</span></span></code></pre></div><p>The bookmark names are arbitrary, but having a starting and stopping point is useful. The DAG
+will be built fully between &ldquo;start&rdquo; and &ldquo;end.&rdquo; If you have design decisions that you want applied
+throughout the DAG, you can put Markdown files on the <code>start</code> change, since they will propagate.
+The dedicated starting change also makes it easy to rebase the whole DAG on the latest version of
+<code>main</code>, assuming it is also changing while you&rsquo;re planning this work.</p>
+<p>I write the description on the <code>end</code> bookmark a bit like it were a ticket. It defines what
+success looks like, even before any code is written. This is what you&rsquo;re going to be working
+toward and how you know whether you accomplished it. Now, it <em>can</em> change! That usually means
+that more detail is added to it throughout the planning effort. But you want a target to aim
+for.</p>
+<p>Here&rsquo;s an example of where I might start in our hypothetical. Assuming I&rsquo;m on the <code>end</code> change,
+<code>jj describe</code> pops open <a href="https://helix-editor.com/"  class="external-link" target="_blank" rel="noopener">Helix</a> (for me), where I can write a reasonable description:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>Add Word Count Mode
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>This change introduces a new &#34;word count&#34; mode to the application.
+</span></span><span style="display:flex;"><span>Providing &#34;-w&#34; as a flag to the CLI program will tell it to return
+</span></span><span style="display:flex;"><span>the number of words, rather than the default behavior of returning
+</span></span><span style="display:flex;"><span>the number of lines in the file.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Usage: my-awesome-program -w &lt;file path&gt;
+</span></span></code></pre></div><p>Following this, I can see the current state of the DAG with <code>jj log</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>@  pwwzkooq my@email.com 2026-08-25 15:45:36 end 4b2d8706
+</span></span><span style="display:flex;"><span>│  (empty) Add Word Count Mode
+</span></span><span style="display:flex;"><span>○  otqzstsn my@email.com 2026-08-25 15:42:41 start e9e45f4a
+</span></span><span style="display:flex;"><span>│  (empty) (no description set)
+</span></span><span style="display:flex;"><span>○  yqupzxny my@email.com 2026-08-25 15:42:07 main 2d4960f8
+</span></span></code></pre></div><p>(Pro-tip: In big repos, you might see a lot of stuff you&rsquo;re not interested in right now. Use
+<code>jj log -r 'start::end'</code> to limit the output to only your planning changes.)</p>
+<h3 id="building-the-dag">
+  Building the DAG
+  <a class="heading-link" href="#building-the-dag">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>We&rsquo;re basically following our Mikado approach here, so we start at the top (the <code>end</code>). Here,
+I (or an agent) would begin writing some code that implements the functionality required
+by the change description. The goal is for the code supporting the description to focus on
+doing what the description says. Ideally, we want our changes to be implementable by roughly
+a couple hundred lines of <em>production</em> code along with up to a few hundred lines of tests. This
+isn&rsquo;t the number of lines in our prototype, so there&rsquo;s a judgment call here. The prototype
+typically will give a pretty good idea of the changes required though.</p>
+<p>Following the example from the previous article, let&rsquo;s say I quickly realize that my first
+hurdle is I have all line counting functionality in my main function (the left-hand node in
+the graph). I decide I need to fix this before I can do much more. So, I&rsquo;ll create a new
+change in the DAG: <code>jj new -B @</code>. This will create a new parent before the current change and
+switch over to it. Before writing any code at all, I would first describe what I think I&rsquo;m
+going to need from this node using <code>jj describe</code>. This is important: The descriptions describe
+what is required, not how to do it - that&rsquo;s what the code is for. The graph now looks like
+this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>○  pwwzkooq my@email.com 2026-08-25 16:20:00 end 15ae546a
+</span></span><span style="display:flex;"><span>│  (empty) Add Word Count Mode
+</span></span><span style="display:flex;"><span>@  utmmlmvt my@email.com 2026-08-25 16:20:00 d9d0c6e0
+</span></span><span style="display:flex;"><span>│  (empty) Replace Line Count Code in main with Function Call
+</span></span><span style="display:flex;"><span>○  otqzstsn my@email.com 2026-08-25 15:42:41 start e9e45f4a
+</span></span></code></pre></div><p>Note that the change ID (&ldquo;pwwzkooq&rdquo;) for end stayed the same, but the underlying
+commit (&ldquo;15ae546a&rdquo;) has changed. On the other hand, there was no alteration to start, so its
+commit did not change. This ability to change contents as-needed is what I meant earlier
+when I said I think of changes a bit like mutable commits. Their identifiers are &ldquo;locked,&rdquo;
+but their contents are able to be changed.</p>
+<p>From here, I would continue working on my prototype and building new parents as needed. From
+the example, one other interesting case is the two parents for the &ldquo;Replace Line Count&hellip;&rdquo;
+node. This node has <em>two</em> parents, not one. This is, again, easily achievable in jj. I can create
+the first one just like before: <code>jj new -B @</code> and then describe it. This inserts a new parent
+between the change and its existing parent, so the graph looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>○  pwwzkooq my@email.com 2026-08-25 16:28:05 end eef57e32
+</span></span><span style="display:flex;"><span>│  (empty) Add Word Count Mode
+</span></span><span style="display:flex;"><span>○  utmmlmvt my@email.com 2026-08-25 16:28:05 fc49cd48
+</span></span><span style="display:flex;"><span>│  (empty) Replace Line Count Code in main with Function Call
+</span></span><span style="display:flex;"><span>@  tsqwwvwx my@email.com 2026-08-25 16:28:05 aa32af0d
+</span></span><span style="display:flex;"><span>│  (empty) Write Integration Tests for Existing Behavior
+</span></span><span style="display:flex;"><span>○  otqzstsn my@email.com 2026-08-25 15:42:41 start e9e45f4a
+</span></span></code></pre></div><p>But the next dependency is unrelated to this new one. Instead, we want to parent it on <code>start</code>.
+Going back to change &ldquo;utmmlmvt,&rdquo; we can accomplish this with <code>jj new -B utmmlmvt -A start</code>. After
+giving it a description, we have the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>○  pwwzkooq my@email.com 2026-08-25 16:31:19 end fadc23b7
+</span></span><span style="display:flex;"><span>│  (empty) Add Word Count Mode
+</span></span><span style="display:flex;"><span>○    utmmlmvt my@email.com 2026-08-25 16:31:19 c9c24eac
+</span></span><span style="display:flex;"><span>├─╮  (empty) Replace Line Count Code in main with Function Call
+</span></span><span style="display:flex;"><span>│ @  oxwlrnos my@email.com 2026-08-25 16:31:19 ab937d4a
+</span></span><span style="display:flex;"><span>│ │  (empty) Make Helper Function for Line Counting
+</span></span><span style="display:flex;"><span>○ │  tsqwwvwx my@email.com 2026-08-25 16:28:05 aa32af0d
+</span></span><span style="display:flex;"><span>├─╯  (empty) Write Integration Tests for Existing Behavior
+</span></span><span style="display:flex;"><span>○  otqzstsn my@email.com 2026-08-25 15:42:41 start e9e45f4a
+</span></span></code></pre></div><p>As you run out of parents, you work your way back up the graph, fleshing out the prototype
+as you go.</p>
+<p>And, really, this is about it. It&rsquo;s an iterative process, just like the previous method we
+used. But, you&rsquo;re just looking for ever-smaller chunks of work that build up to meet the
+goal you&rsquo;ve defined in the change description. At the end, instead of a diagram - such as
+from the previous post - you&rsquo;d have something like this in <code>jj log -r 'start::end'</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>@    pwwzkooq my@email.com 2026-08-25 16:38:16 end f1a23656
+</span></span><span style="display:flex;"><span>├─╮  (empty) Add Word Count Mode
+</span></span><span style="display:flex;"><span>│ ○    kllzlskq my@email.com 2026-08-25 16:38:16 ff604f87
+</span></span><span style="display:flex;"><span>│ ├─╮  (empty) Count Words When User Provides -w Flag
+</span></span><span style="display:flex;"><span>│ │ ○  wlstvytm my@email.com 2026-08-25 16:38:16 509418f3
+</span></span><span style="display:flex;"><span>│ │ │  (empty) Add CLI Flag Parsing to main
+</span></span><span style="display:flex;"><span>│ ○ │  lsvvrzox my@email.com 2026-08-25 16:37:53 f3253fc4
+</span></span><span style="display:flex;"><span>│ │ │  (empty) Create Word Count Helper Function
+</span></span><span style="display:flex;"><span>│ ○ │  uxyynurr my@email.com 2026-08-25 16:37:53 037e548f
+</span></span><span style="display:flex;"><span>│ ├─╯  (empty) Function to Split String into List From Spaces
+</span></span><span style="display:flex;"><span>○ │    utmmlmvt my@email.com 2026-08-25 16:31:19 c9c24eac
+</span></span><span style="display:flex;"><span>├───╮  (empty) Replace Line Count Code in main with Function Call
+</span></span><span style="display:flex;"><span>│ │ ○  oxwlrnos my@email.com 2026-08-25 16:31:19 ab937d4a
+</span></span><span style="display:flex;"><span>│ ├─╯  (empty) Make Helper Function for Line Counting
+</span></span><span style="display:flex;"><span>○ │  tsqwwvwx my@email.com 2026-08-25 16:28:05 aa32af0d
+</span></span><span style="display:flex;"><span>├─╯  (empty) Write Integration Tests for Existing Behavior
+</span></span><span style="display:flex;"><span>○  otqzstsn my@email.com 2026-08-25 15:42:41 start e9e45f4a
+</span></span></code></pre></div><p>For this exercise, I didn&rsquo;t write any code, which is why each change says it&rsquo;s empty.
+Normally, this wouldn&rsquo;t be the case. There&rsquo;s not much to see because I didn&rsquo;t write any code,
+but you can look at each change conveniently with, for example, <code>jj show kllzlskq</code>, which
+will show the long-form description as well as a code diff for that change.</p>
+<h3 id="handing-off-to-the-team">
+  Handing Off to the Team
+  <a class="heading-link" href="#handing-off-to-the-team">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>So, what does the team get out of this? There are two main outputs.</p>
+<p>First, the prototype branch is pushed to GitHub. Each jj change corresponds to a Git commit,
+and the DAG is saved accordingly. Team members can pull down the branch and use jj locally
+to review it. The entire graph can be viewed using <code>jj log</code>.</p>
+<p>Second, the planner ensures there are Jira tickets created for each node in the DAG. This is
+easily automatable, and AI agents do this well. The Jira title is the change description summary
+line. The ticket body contents are the rest of the change description. And tickets are linked via
+blocked-by/blocks relationships based on the DAG (parents &ldquo;block&rdquo; children, which are &ldquo;blocked
+by&rdquo; their parents). We further augment this by including a comment with a link to the
+specific matching prototype commit in GitHub, which is a quality-of-life improvement for
+the engineers doing the work.</p>
+<h2 id="rough-edges">
+  Rough Edges
+  <a class="heading-link" href="#rough-edges">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>We&rsquo;ve had initial success using this process, but there are some rough edges still.
+The biggest gap is in visualizing the graph. Naturally, the diagramming tool like we used before
+allowed us to make very nice-looking graphs. Raw <code>jj log</code> output displays the
+graph, but it can be more difficult to decipher than a purpose-built chart. The benefits of
+not switching between systems outweigh the drawbacks here, in my opinion, but it&rsquo;s a real
+gap. A couple folks on my team built a nice VS Code plugin for visualizing these plans
+(unfortunately, not open source). I do think in-editor visualization is probably a good approach
+here, since we&rsquo;re trying to keep people in their IDEs as much as possible.</p>
+<p>The second issue  is simply that it does rely so heavily on jj, and this is still a new
+tool for many folks. I use it for my day-to-day version control, so I&rsquo;m quite comfortable
+with it. But, there <em>is</em> a small learning curve for folks to get up to speed using it.</p>
+<p>Finally, and - so far for us - most minor of all is, in our Jira tickets we link to a commit,
+since there is no way to link a change ID. If the lead engineer were to make alterations to
+a change, these would leave the change ID in tact, but the underlying Git commit is updated. When
+pushing to GitHub, then, the previous commit ID is replaced with the new one. In the event that
+the corresponding Jira ticket has already been created, the link to the commit will now be broken.
+This means going back through the appropriate tickets and updating links. Again, something an
+agent can do, but it&rsquo;s a bit of an annoyance. In practice, we don&rsquo;t usually create the Jira
+tickets until the prototype is considered &ldquo;done,&rdquo; but it&rsquo;s worth watching out for. (Especially
+assuming your repository isn&rsquo;t <a href="https://ersc.io/"  class="external-link" target="_blank" rel="noopener">hosted somewhere jj-native</a>.)</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>So, can a version control system help in project planning?</p>
+<p>For me, yes. I was honestly skeptical of the idea when it first occurred to me, but it&rsquo;s held up
+through planning a few projects this way. As an engineer, it helps me avoid bouncing between a
+diagram and my editor. Keeping everything in one place also makes it easy to share
+with others, who can quickly cross-reference the plan with the prototype implementation. It feels
+like a natural evolution of the Mikado process we&rsquo;ve been using for years.</p>
+<p>Even with a few rough edges, the process has been a net positive for planning, and I expect
+we&rsquo;ll smooth those out over time. I&rsquo;d encourage you to give this approach a shot.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2026
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.js"></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

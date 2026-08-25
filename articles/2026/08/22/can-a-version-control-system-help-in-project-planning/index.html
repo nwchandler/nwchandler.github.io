@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <title>
+  Can a Version Control System Help in Project Planning? · Nick Chandler
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Nick Chandler">
+<meta name="description" content="This post looks at how I have been using the jj version control system to augment Mikado Method planning.">
+<meta name="keywords" content="systems software, operating systems, distributed systems, compilers, networking, systems programming, virtualization, computer systems, software craftsmanship, technical writing, experiments, lab notes">
+
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Can a Version Control System Help in Project Planning?">
+  <meta name="twitter:description" content="This post looks at how I have been using the jj version control system to augment Mikado Method planning.">
+
+<meta property="og:url" content="http://localhost:1313/articles/2026/08/22/can-a-version-control-system-help-in-project-planning/">
+  <meta property="og:site_name" content="Nick Chandler">
+  <meta property="og:title" content="Can a Version Control System Help in Project Planning?">
+  <meta property="og:description" content="This post looks at how I have been using the jj version control system to augment Mikado Method planning.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-08-22T19:45:56-04:00">
+    <meta property="article:modified_time" content="2026-08-22T19:45:56-04:00">
+    <meta property="article:tag" content="Software Engineering">
+    <meta property="article:tag" content="Mikado Method">
+    <meta property="article:tag" content="Jujutsu">
+    <meta property="article:tag" content="Version Control">
+
+
+
+
+<link rel="canonical" href="http://localhost:1313/articles/2026/08/22/can-a-version-control-system-help-in-project-planning/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.css" media="screen">
+
+
+
+
+
+
+  
+    
+    
+    <link rel="stylesheet" href="/css/coder-dark.css" media="screen">
+  
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+
+
+<body class="preload-transitions colorscheme-auto">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="http://localhost:1313/">
+      Nick Chandler
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://localhost:1313/articles/2026/08/22/can-a-version-control-system-help-in-project-planning/">
+              Can a Version Control System Help in Project Planning?
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-08-22T19:45:56-04:00">
+                August 22, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/software-engineering/">Software Engineering</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/mikado-method/">Mikado Method</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/jujutsu/">Jujutsu</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/version-control/">Version Control</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>I&rsquo;ve <a href="http://localhost:1313/articles/2024/09/21/faster-software-development-with-the-mikado-method/" >written before</a> about how my team at work has adopted a variant of
+the <a href="https://www.manning.com/books/the-mikado-method"  class="external-link" target="_blank" rel="noopener">Mikado Method</a> for software project planning. We started this in 2023 and have evolved
+the process a bit since then. Most notably, we&rsquo;ve adopted a more strict process of prototyping
+during the planning phase. Where we originally only did a bit of spiking up front, we learned that
+our designs were better if the lead engineer actually built a &ldquo;walking skeleton.&rdquo; This code doesn&rsquo;t
+have much error checking, there are no tests, and small bits may still be implemented as pseudocode
+in comments, but it makes it clear where parts of the system interface with one another and what
+each must provide.</p>
+<p>The method works great (IMHO) when planning work for a team. It ensures the engineers working on
+implementation have a starting point (the prototype code), along with a work
+plan that allows incremental implementation (the Mikado chart, along with properly linked tickets in
+Jira).</p>
+<p>But, there are a few drawbacks to this process. First, creating the prototype can be quite
+time-consuming. Additionally, the designer bounces between a diagramming tool, to
+manage the Mikado chart, and their IDE, to write code. This disconnect between the plan and the
+prototype implementation makes it more difficult than it needs to be for engineers to map between
+the two.</p>
+<p>In this article, I&rsquo;m going to gloss over the first of those issues. Instead, I&rsquo;ll focus on
+how we have started to use the <a href="https://www.jj-vcs.dev"  class="external-link" target="_blank" rel="noopener">jujutsu (jj)</a> version control system to address the latter.</p>
+<blockquote>
+<p>If you&rsquo;re curious about the former, we now have AI agents that happily and speedily produce
+not-quite-production-ready (prototype) code. We have started to lean on them for this process.
+However, we are still very careful to ensure that the scope of each node in the graph is small and
+targeted; after all, if a bug gets buried in a 2000-line PR, the agents aren&rsquo;t the ones waking up
+when it causes a pager to go off at 3am. Less sarcastically, modern AI models also allow us
+to explore different design and implementation options as well, so we can quickly get a sense
+of how multiple approaches &ldquo;feel&rdquo; to work with, which is a real time saver and system design win.</p></blockquote>
+<h2 id="the-key-insight">
+  The Key Insight
+  <a class="heading-link" href="#the-key-insight">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Both a project plan <em>and</em> a version control history are ultimately
+<a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph"  class="external-link" target="_blank" rel="noopener">directed acyclic graphs (DAGs)</a>. The key insight I had when thinking about the challenges
+listed above is this: if a node in a VCS graph could carry enough metadata to make its place in a
+project plan make sense, then the entire project plan could be represented within the graph itself.
+And, in our case, because the node would also contain just the prototype code for <em>that</em> node, it
+would become trivially easy to map between the code changes and the Mikado graph.</p>
+<p>That only works, though, if editing the version control DAG is easy. This is where jj comes in.</p>
+<h2 id="just-enough-jj">
+  Just Enough jj
+  <a class="heading-link" href="#just-enough-jj">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Jujutsu is a version control system that takes inspiration from earlier version control systems
+and abstracts the user interface from the underlying storage. In our case, Git is still the
+underlying storage for our repositories. However, jj gives us some capabilities that are nicer
+than working with Git natively.</p>
+<p>Critically, jj makes rebasing a breeze. Imagine you&rsquo;re working on a <a href="https://docs.jj-vcs.dev/latest/glossary/#change"  class="external-link" target="_blank" rel="noopener">change</a> (think
+of this like a mutable commit), and you spot an issue from an earlier change that needs fixing.
+You can switch to that one (<code>jj edit &lt;previous-change-id&gt;</code>), make the fix, and it will
+auto-propagate to all descendants. In the event of conflicts, jj records them in the affected
+descendants instead of halting the rebase to make you fix them immediately. You can resolve them
+(<code>jj resolve</code>) whenever you&rsquo;re ready, and the fix flows downward the same way.</p>
+<p>If you&rsquo;re working on a change and decide you want to write some code that the change could
+rely on, you can create a brand new parent and do the work there (<code>jj new --insert-before @</code> to
+insert before the &ldquo;current&rdquo; change). And, again, that work will auto-propagate to descendants.
+This simplicity is a key benefit we&rsquo;ve found.</p>
+<p>Additionally, jj makes it simple to write great commit messages (jj calls these descriptions),
+even on empty changes. A simple <code>jj describe</code> pops up your favorite text editor, where you can
+write as much or as little as you want. And, you can evolve this. At any time, when you&rsquo;re on a
+change, you can run <code>jj describe</code> again to edit what you&rsquo;ve previously written, to better reflect
+the contents of the change. If you want to see the description along with the actual code
+for each change, it&rsquo;s as easy as <code>jj show</code>. Along with the ease of rebasing, this makes it
+quite easy to ensure changes are atomic - gone are the days of commits like &ldquo;wip&rdquo; or &ldquo;fix a typo.&rdquo;</p>
+<p>Admittedly, these are things that could be done using Git. But the ergonomics of jj feel more
+intuitive to me.</p>
+<blockquote>
+<p>If you&rsquo;re interested in learning to use jj, I highly recommend <a href="https://www.youtube.com/watch?v=MR6KSB6I_60"  class="external-link" target="_blank" rel="noopener">this video</a> by
+Matthew Sanabria. It&rsquo;s an outstanding overview, and I share it with everyone I evangelize
+jj to!</p></blockquote>
+<h2 id="the-plan-is-the-graph">
+  The Plan is the Graph
+  <a class="heading-link" href="#the-plan-is-the-graph">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h2 id="putting-it-together-planning-a-project">
+  Putting it Together: Planning a Project
+  <a class="heading-link" href="#putting-it-together-planning-a-project">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h2 id="handing-off-to-the-team">
+  Handing Off to the Team
+  <a class="heading-link" href="#handing-off-to-the-team">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h2 id="rough-edges">
+  Rough Edges
+  <a class="heading-link" href="#rough-edges">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+    <section class="container">
+        ©
+        
+        2023 -
+        
+        2026
+         Nick Chandler 
+        ·
+        
+        Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a
+            href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+
+        
+
+    </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.js"></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

@@ -6,8 +6,15 @@
     <description>Recent content in Software Engineering on Nick Chandler</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 21 Sep 2024 23:30:34 -0400</lastBuildDate>
+    <lastBuildDate>Sat, 22 Aug 2026 19:45:02 -0400</lastBuildDate>
     <atom:link href="https://nickchandler.dev/tags/software-engineering/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Can a Version Control System Help in Project Planning?</title>
+      <link>https://nickchandler.dev/articles/2026/08/25/can-a-version-control-system-help-in-project-planning/</link>
+      <pubDate>Tue, 25 Aug 2026 19:00:00 -0400</pubDate>
+      <guid>https://nickchandler.dev/articles/2026/08/25/can-a-version-control-system-help-in-project-planning/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve &lt;a href=&#34;https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/&#34; &gt;written before&lt;/a&gt; about how my team at work has adopted a variant of&#xA;the &lt;a href=&#34;https://www.manning.com/books/the-mikado-method&#34;  class=&#34;external-link&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Mikado Method&lt;/a&gt; for software project planning. We started this in 2023 and have evolved&#xA;the process a bit since then. Most notably, we&amp;rsquo;ve adopted a more strict process of prototyping&#xA;during the planning phase. Where we originally only did a bit of spiking up front, we learned that&#xA;our designs were better if the lead engineer actually built a &amp;ldquo;walking skeleton.&amp;rdquo; This code doesn&amp;rsquo;t&#xA;have much error checking, there are no tests, and small bits may still be implemented as pseudocode&#xA;in comments, but it makes it clear where parts of the system interface with one another and what&#xA;each must provide.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Faster Software Development with the Mikado Method</title>
       <link>https://nickchandler.dev/articles/2024/09/21/faster-software-development-with-the-mikado-method/</link>
